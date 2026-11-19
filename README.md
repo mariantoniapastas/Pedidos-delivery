@@ -115,6 +115,43 @@ habilitado. Ese es el tuyo: no hace falta repartirlo.
 
 Los pedidos nunca se mezclan: se filtran por sucursal **y** por fecha de entrega.
 
+## La portada y "Nuestra casa"
+
+El botón de abajo de la portada abre una tarjeta con la sucursal que entrega en ese barrio:
+nombre, dirección y, si la columna `telefono` está cargada, un botón para llamar y otro de
+WhatsApp. Es el camino del cliente para cualquier duda o cambio en su pedido.
+
+La app **no recuerda pedidos anteriores**. No hay "repetir": cada vez que el cliente entra, el
+catálogo arranca en cero y lo recorre. Se decidió así a propósito — repetir el último pedido es
+cómodo pero hace que nadie mire lo nuevo. (El carrito a medio llenar sí sobrevive a un refresh
+dentro de la misma semana; eso es otra cosa.)
+
+## El descuento por pagar en efectivo
+
+Lo pone cada barrio en la columna `desc_efectivo` (o desde el portal, pestaña Barrios, en
+porcentaje). **La app arma el cartel con ese número**: si cargás 15, en la pantalla de pago
+dice "15% off"; si cargás 0, no aparece ningún cartel ni promesa de ahorro, y el efectivo
+queda como un medio de pago más.
+
+## El PIN y la sesión del portal
+
+Cada sucursal entra con su PIN (columna `pin` de `Sucursales`) y ve solamente lo suyo. Tu clave
+maestra de `Codigo.gs` abre todas.
+
+El portal **recuerda el PIN en esa computadora** hasta que alguien toque "Salir". Eso vive solo
+en ese navegador: desde otra computadora no sirve de nada, hay que escribir el PIN. Mientras
+revalida la sesión guardada muestra "Abriendo el portal…" — antes mostraba el formulario y a
+veces entraba solo justo cuando estabas tecleando.
+
+Lo que protege contra entrar desde otra computadora es **el PIN en sí**, así que usá al menos
+6 dígitos y nada obvio (1234, el año, el número del local). Un PIN de 4 dígitos se prueba
+entero en minutos. El backend ayuda: cada intento fallido frena un segundo y medio y, después
+de 20 errores seguidos, corta el login 10 minutos. Con 6 dígitos y esa pausa, probarlos todos
+lleva semanas.
+
+Si un PIN se filtró, cambialo en la planilla: las sesiones abiertas con el viejo se caen solas
+en la siguiente apertura.
+
 ## La lista de precios
 
 Los precios de pastas y salsas son **los mismos para todas las sucursales**. Viven en
@@ -230,4 +267,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v3.0` (app) y `v1.9` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v3.2` (app) y `v2.0` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.

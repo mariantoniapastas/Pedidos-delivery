@@ -106,11 +106,6 @@ input,select,textarea{font:inherit;color:inherit}
 .strip svg{flex-shrink:0}
 .barrioNom{font-family:var(--d);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--terra);margin-top:14px;font-weight:500}
 .locbtn{margin-top:20px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:3px;align-self:center}
-.lastord{display:flex;align-items:center;gap:12px;background:var(--sand);border-radius:var(--r);padding:13px 14px;margin-bottom:18px}
-.lastord .li{flex:1;min-width:0;text-align:left}
-.lastord b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy-600)}
-.lastord span{display:block;font-size:13.5px;margin-top:3px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lastord button{background:var(--navy);color:var(--paper);border-radius:10px;padding:10px 15px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px;flex-shrink:0}
 
 /* ---------- category list ---------- */
 .eyebrow{display:flex;align-items:center;gap:12px;color:var(--navy);font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;margin:2px 0 16px}
@@ -286,6 +281,11 @@ input,select,textarea{font:inherit;color:inherit}
 .loc:last-of-type{border-bottom:none}
 .loc .n{font-family:var(--d);font-size:16px;letter-spacing:.13em;text-transform:uppercase;font-weight:500}
 .loc .a{font-size:13px;color:var(--ink-2);margin-top:3px}
+.loc .t{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.loc .t a{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--paper);
+  border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;text-decoration:none}
+.loc .t a.wa{background:var(--verde,#2F6B4F)}
+.loc .h{font-size:12.5px;color:var(--ink-2);line-height:1.45;margin-top:11px}
 
 /* ---------- panel de pre-publicación ---------- */
 .pubbar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:10px}
@@ -389,7 +389,7 @@ input,select,textarea{font:inherit;color:inherit}
         <span class="gro">›</span>
       </button>
     </div>
-    <button class="locbtn" onclick="openLoc()">Nuestros locales</button>
+    <button class="locbtn" onclick="openLoc()">Nuestra casa</button>
     <div class="wheat">
       <svg width="150" height="26" viewBox="0 0 150 26" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
         <path d="M40 25V8M40 8l-5-4M40 8l5-4M40 13l-5-4M40 13l5-4M40 18l-5-4M40 18l5-4"/>
@@ -412,7 +412,6 @@ input,select,textarea{font:inherit;color:inherit}
       <b class="cartdot" data-dot hidden>0</b></span></button>
   </div>
   <div class="body"><div class="pad">
-    <div id="lastord"></div>
     <div class="eyebrow">Nuestras pastas</div>
     <div class="catlist" id="catlist"></div>
     <div class="foot">Elaboración propia desde 2006</div>
@@ -608,10 +607,7 @@ function pintarTodo(){
   $('#stripDate').textContent = 'Entrega el ' + proxEntrega();
   $('#stripCierre').textContent = 'Pedí hasta el ' + NEGOCIO.cierre;
   $('#barrioNom').textContent = BARRIO ? BARRIO.nombre : '';
-  $('#locList').innerHTML = SUCURSAL
-    ? '<div class="loc"><div class="n">'+esc(SUCURSAL.nombre)+'</div>' +
-      '<div class="a">'+esc(SUCURSAL.direccion)+'</div></div>'
-    : '';
+  $('#locList').innerHTML = pintarLocal();
   document.querySelectorAll('.scr').forEach(function(x){ x.classList.remove('cargando'); });
   refrescar();
 }
@@ -637,7 +633,7 @@ const modo = 'envio';   // esta app es solo entrega a domicilio
 const cliente = { nom:'', tel:'', obs:'' };
 
 /* ============ UTILIDADES ============ */
-const VERSION = 'v3.0';
+const VERSION = 'v3.2';
 const $ = s => document.querySelector(s);
 const money = n => '$' + Math.round(n).toLocaleString('es-AR');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -745,29 +741,27 @@ function refrescar(){
   dots();
 }
 
-/* ============ ÚLTIMO PEDIDO (queda en el celular del cliente) ============ */
-function ultimo(){
-  try {
-    const u = JSON.parse(localStorage.getItem('ma_ultimo') || 'null');
-    return (u && u.items && u.items.length && u.items.some(i => find(i.k))) ? u : null;
-  } catch(e){ return null; }
-}
-function guardarUltimo(){
-  const ls = lines();
-  if (!ls.length) return;
-  try { localStorage.setItem('ma_ultimo', JSON.stringify({ items: ls.map(l => ({ k:l.key, q:l.qty })) })); } catch(e){}
-}
-// se recalcula con los precios de hoy, no con los del pedido viejo
-function resumenUltimo(u){
-  const v = u.items.filter(i => find(i.k));
-  const t = v.reduce((s,i) => s + find(i.k).precio * i.q, 0);
-  return v.length + (v.length === 1 ? ' producto · ' : ' productos · ') + money(t);
-}
-function repetir(){
-  const u = ultimo(); if (!u) return;
-  Object.keys(cart).forEach(k => delete cart[k]);
-  u.items.forEach(i => { if (find(i.k)) cart[i.k] = i.q; });
-  go('cart');
+// La sucursal que atiende este barrio: dónde está y a dónde llamar.
+function pintarLocal(){
+  if (!SUCURSAL) return '';
+  const tel = String(SUCURSAL.telefono || '').trim();
+  const solo = tel.replace(/\D/g, '');
+  const wa = waAr(tel);
+  return '<div class="loc">' +
+    '<div class="n">'+esc(SUCURSAL.nombre)+'</div>' +
+    (SUCURSAL.direccion ? '<div class="a">'+esc(SUCURSAL.direccion)+'</div>' : '') +
+    (tel
+      ? '<div class="t"><a href="tel:'+esc(solo)+'">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 005 5L15 12l5 2v4a2 2 0 01-2.2 2A16 16 0 013 5.2 2 2 0 015 3z"/></svg>' +
+          esc(tel)+'</a>' +
+        (wa
+          ? '<a class="wa" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 01-11.9 7L4 20l1.1-4A8 8 0 1120 12z"/></svg>WhatsApp</a>'
+          : '') +
+      '</div>'
+      : '') +
+    '<div class="h">Cualquier duda o problema con tu pedido, escribinos o llamanos.</div>' +
+    '</div>';
 }
 
 /* ============ CONSERVACIÓN Y RECORRIDO ============ */
@@ -866,13 +860,6 @@ function dots(){
 }
 
 function renderCats(){
-  const u = ultimo();
-  $('#lastord').innerHTML = !u ? '' :
-    '<div class="lastord">' +
-      '<div class="li"><b>Tu último pedido</b><span>'+esc(resumenUltimo(u))+'</span></div>' +
-      '<button onclick="repetir()">' +
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 6.3"/><path d="M20 5v6h-6"/></svg>Repetir</button></div>';
-
   $('#catlist').innerHTML = modulosVivos().map(catHTML).join('');
 
   $('#barSlot').innerHTML = cartBar();
@@ -1285,7 +1272,7 @@ let ultimoId = null, pago = null;      // 'efectivo' | 'transferencia' | 'mp'
 
 const descuento = () => pago === 'efectivo' ? Math.round(subtotal() * NEGOCIO.descEfectivo) : 0;
 const totalFinal = () => subtotal() - descuento() + envio();
-const nombrePago = { efectivo:'Efectivo (10% off)', transferencia:'Transferencia', mp:'Mercado Pago' };
+const pctEfectivo = () => Math.round((NEGOCIO.descEfectivo || 0) * 100);
 
 function elegirPago(m){ pago = m; renderPago(); }
 
@@ -1306,7 +1293,8 @@ function renderPago(){
   let h = '<div class="paytot"><span>Total a pagar</span><b>'+money(totalFinal())+'</b>' +
     (descuento() ? '<span class="off">Ahorrás '+money(descuento())+'</span>' : '') + '</div>';
 
-  h += opt('efectivo', 'Efectivo', 'Pagás al recibir el pedido', '<span class="tag">10% off</span>');
+  h += opt('efectivo', 'Efectivo', 'Pagás al recibir el pedido',
+           pctEfectivo() ? '<span class="tag">'+pctEfectivo()+'% off</span>' : '');
   h += opt('transferencia', 'Transferencia', 'A nuestra cuenta, antes de la entrega');
   if (pago === 'transferencia'){
     h += '<div class="aliasbox"><div class="k">Alias</div><div class="v">'+esc(NEGOCIO.alias)+'</div>' +
@@ -1345,7 +1333,6 @@ async function confirmar(){
     return;
   }
 
-  guardarUltimo();
   ultimoId = r.id;
   $('#doneId').textContent = r.id;
   $('#doneTitle').textContent = '¡Pedido listo!';
@@ -1563,6 +1550,7 @@ const closeLoc = () => $('#mLoc').classList.remove('on');
 
 /* ============ INIT ============ */
 // La portada, la fecha y el local los llena pintarTodo() cuando llega la config.
+try { localStorage.removeItem('ma_ultimo'); } catch(e){}   // ya no se recuerda el pedido
 leerCliente();
 const habia = leerCarrito();
 arrancar().then(function(){ if (habia && count()) go('cat'); });
