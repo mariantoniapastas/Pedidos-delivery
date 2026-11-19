@@ -1,4 +1,4 @@
-# Mariantonia — App de pedidos (v2.0)
+# Mariantonia — App de pedidos
 
 PWA de toma de pedidos a domicilio. **Una sola app para todos los barrios**: el barrio viaja
 en el link y la app se configura sola leyendo la planilla.
@@ -115,6 +115,31 @@ habilitado. Ese es el tuyo: no hace falta repartirlo.
 
 Los pedidos nunca se mezclan: se filtran por sucursal **y** por fecha de entrega.
 
+## Modificar un pedido ya hecho
+
+Hasta el **cierre de pedidos del barrio**, el cliente que vuelve a abrir la app ve una tarjeta
+roja en la portada con su pedido y un botón para modificarlo. Después del cierre la tarjeta
+desaparece sola: la producción ya está planificada con esos totales.
+
+Hay dos casos, y los decide el backend, no la app:
+
+| Cómo pagó | Qué puede hacer |
+|---|---|
+| Efectivo, o transferencia **sin** comprobante adjunto | Cambiar todo: agregar, sacar, subir o bajar cantidades |
+| Transferencia **con** comprobante adjunto, o marcado "cobrado" | **Solo agregar.** No puede sacar renglones, bajar cantidades ni cambiar fresco/freezer de lo que ya pidió |
+
+En el segundo caso queda asentado cuánto pagó (columna `pagado`, se completa sola al adjuntar
+el comprobante o al marcarlo cobrado). La diferencia se cobra en la entrega y la app se lo
+avisa al cliente antes de guardar.
+
+**En el portal**, un pedido modificado aparece con borde rojo, chip `MODIFICADO` y, si falta
+cobrar, el chip `FALTA $X`. Arriba de la lista sale una alerta roja con cuántos se modificaron
+y cuánto suman las diferencias. Al abrir el detalle hay un aviso de que esa es la lista buena y
+una caja roja con lo que hay que cobrar. Además **llega un mail aparte**, con asunto
+`⚠️ MODIFICADO`, para que no se mezcle con el del pedido original.
+
+El CSV de la sucursal trae dos columnas nuevas: `Modificado` y `Falta cobrar`.
+
 ## El resumen de cierre
 
 Cuando a un barrio se le cierra el pedido, su sucursal recibe un mail con todo lo que hay que
@@ -132,4 +157,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.4` (app) y `v1.4` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.5` (app) y `v1.5` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
