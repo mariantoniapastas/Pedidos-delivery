@@ -26,7 +26,7 @@ Planilla: **Mariantonia — Pedidos** (Google Drive). Todo se edita ahí, no en 
 | `manifest.json` | Hace que se instale en el celular con ícono propio. |
 | `sw.js` | Service worker. Abre sin internet; no cachea el backend. |
 | `portal.html` | Portal interno de la sucursal. Se entra con la clave del sistema. |
-| `icon-192.png` / `icon-512.png` | Íconos. Provisorios. |
+| `icon-192.png` / `icon-512.png` | Íconos, generados del logo real. |
 
 El Apps Script **no va en el repositorio**: vive dentro de la planilla.
 
@@ -127,7 +127,9 @@ función `crearActivador()`** desde el editor de Apps Script.
   de pago de MP en la columna correspondiente, se habilita.
 - **Las fotos.** La columna `foto_url` de la planilla está vacía. En cuanto le pongas una URL,
   la imagen reemplaza el espacio marcado.
+- **Un isotipo para el ícono.** El ícono de la app usa el logo completo; a tamaño chico el
+  texto se achica mucho. Si existe una versión símbolo sin texto, queda mejor.
 
 ## Versión
 
-`v2.0` (app) y `v1.2` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.4` (app) y `v1.4` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.

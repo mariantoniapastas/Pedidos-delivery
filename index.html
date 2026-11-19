@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#153350">
+<meta name="theme-color" content="#003B52">
 <meta name="description" content="Pedidos de pastas frescas Mariantonia">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,10 +24,10 @@
 <style>
 :root{
   color-scheme: light;
-  --navy-900:#0C1F33;
-  --navy:#153350;
-  --navy-600:#27567A;
-  --navy-300:#8FA6B8;
+  --navy-900:#00222F;
+  --navy:#003B52;
+  --navy-600:#1C5A74;
+  --navy-300:#7FA3B2;
   --cream:#F2EDE1;
   --paper:#FCFAF4;
   --sand:#E8DABE;
@@ -35,8 +35,8 @@
   --terra:#A8412F;
   --terra-soft:#F2DFD8;
   --line:#DED5C2;
-  --ink:#153350;
-  --ink-2:#5C7186;
+  --ink:#003B52;
+  --ink-2:#4E7585;
   --ok:#2F6B4F;
   --d:'Jost','Futura','Century Gothic',sans-serif;
   --s:'Caveat','Segoe Script',cursive;
@@ -71,20 +71,30 @@ input,select,textarea{font:inherit;color:inherit}
 .wrapdot{position:relative;display:grid;place-items:center}
 
 /* ---------- home ---------- */
-#s-home .body{background:var(--paper)}
-.home{background:var(--paper);min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:34px 26px 26px;text-align:center;position:relative}
+#s-home .body{background:var(--paper);display:flex;flex-direction:column}
+#s-nada .body{display:flex;flex-direction:column}
+.home{background:var(--paper);flex:1;display:flex;flex-direction:column;justify-content:center;padding:34px 26px 26px;text-align:center;position:relative}
 :focus-visible{outline:2.5px solid var(--terra);outline-offset:2px;border-radius:6px}
 .bar :focus-visible,.hcard.navy:focus-visible,.step button:focus-visible,.btn:focus-visible{outline-color:#F0B8A8}
-.crest{width:158px;height:158px;border-radius:50%;border:1.5px solid var(--navy);margin:0 auto 26px;display:grid;place-items:center;background:var(--paper)}
-.crest svg{width:96px;height:96px}
+.logo{display:block;width:100%;max-width:252px;height:auto;margin:0 auto;color:var(--navy)}
+.logo.chico{max-width:150px}
+.bar .logo{max-width:124px;color:var(--paper)}
+.mbox .mh .logo{max-width:132px;color:var(--paper)}
 .wordmark{font-family:var(--d);font-size:37px;letter-spacing:.17em;margin:0;font-weight:400;line-height:1;text-indent:.17em}
-.subword{font-size:11px;letter-spacing:.34em;color:var(--ink-2);margin-top:12px;text-transform:uppercase}
+.subword{font-size:11px;letter-spacing:.34em;color:var(--ink-2);margin-top:2px;text-transform:uppercase}
 .rule{width:52px;height:1px;background:var(--line);margin:26px auto 0}
 .script{font-family:var(--s);font-size:27px;line-height:1.15;color:var(--navy-600)}
 .homecards{display:flex;flex-direction:column;gap:11px;margin-top:28px;text-align:left}
 .hcard{display:flex;align-items:center;gap:14px;border-radius:var(--r);padding:15px 16px}
 .hcard.sand{background:var(--sand);color:var(--navy)}
 .hcard.navy{background:var(--navy);color:var(--paper)}
+.hcard[disabled]{opacity:.45;cursor:default}
+.strip.cargando{opacity:.5}
+.strip.cargando b{color:var(--ink-2);font-weight:400}
+@media(prefers-reduced-motion:no-preference){
+  .strip.cargando{animation:latir 1.1s ease-in-out infinite}
+  @keyframes latir{0%,100%{opacity:.4}50%{opacity:.75}}
+}
 .hcard b{display:block;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
 .hcard span{display:block;font-size:13px;opacity:.72;margin-top:2px}
 .hcard .gro{margin-left:auto;opacity:.6}
@@ -107,7 +117,7 @@ input,select,textarea{font:inherit;color:inherit}
 .eyebrow::before,.eyebrow::after{content:'';flex:1;height:1px;background:var(--line)}
 .catlist{display:flex;flex-direction:column;gap:10px}
 .mod{background:var(--paper);border:1px solid var(--line);border-radius:var(--r)}
-.mod.open{border-color:#B9C7D2;box-shadow:0 2px 10px rgba(21,51,80,.07)}
+.mod.open{border-color:#B9C7D2;box-shadow:0 2px 10px rgba(0,59,82,.07)}
 .modhead{display:flex;align-items:center;gap:12px;width:100%;padding:14px 15px;text-align:left}
 .modhead:active{background:#F7F2E7}
 .mod.open .modhead{padding-bottom:13px}
@@ -121,9 +131,9 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ---------- photo slot ---------- */
 .ph{position:relative;background:linear-gradient(140deg,#EFE3CA 0%,#E2D2AF 100%);display:grid;place-items:center;overflow:hidden;flex-shrink:0}
-.ph::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(21,51,80,.055) 0 1.5px,transparent 1.5px 8px)}
-.ph .ini{font-family:var(--d);color:rgba(21,51,80,.34);font-weight:500;line-height:1;position:relative}
-.ph .cam{position:absolute;bottom:5px;right:5px;color:rgba(21,51,80,.3)}
+.ph::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(0,59,82,.055) 0 1.5px,transparent 1.5px 8px)}
+.ph .ini{font-family:var(--d);color:rgba(0,59,82,.34);font-weight:500;line-height:1;position:relative}
+.ph .cam{position:absolute;bottom:5px;right:5px;color:rgba(0,59,82,.3)}
 .ph img{width:100%;height:100%;object-fit:cover;position:relative}
 .ph.sq{width:58px;height:58px;border-radius:11px}
 .ph.sq .ini{font-size:22px}
@@ -170,7 +180,7 @@ input,select,textarea{font:inherit;color:inherit}
 .trust svg{flex-shrink:0;color:var(--navy-600)}
 
 /* ---------- cart bar ---------- */
-.cartbar{position:sticky;bottom:12px;margin:16px 0 0;background:var(--navy);color:var(--paper);border-radius:12px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));box-shadow:0 6px 20px rgba(12,31,51,.3);display:flex;align-items:center;gap:14px}
+.cartbar{position:sticky;bottom:12px;margin:16px 0 0;background:var(--navy);color:var(--paper);border-radius:12px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));box-shadow:0 6px 20px rgba(0,34,47,.3);display:flex;align-items:center;gap:14px}
 .cartbar .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.62}
 .cartbar .tot{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
 .cartbar button{margin-left:auto;background:var(--terra);color:#fff;border-radius:10px;padding:12px 17px;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -184,7 +194,7 @@ input,select,textarea{font:inherit;color:inherit}
 .crow .cb{grid-column:1/-1;display:flex;align-items:center;gap:10px}
 .cons{display:inline-flex;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-left:auto}
 .cons button{padding:6px 11px;border-radius:7px;font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:5px;line-height:1}
-.cons button.on{background:var(--paper);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(12,31,51,.14)}
+.cons button.on{background:var(--paper);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,34,47,.14)}
 .cons button.on.frz{color:#1B5E8C}
 .allfrz{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:#1B5E8C;border-bottom:1px solid #BBD3E3;padding-bottom:2px;align-self:flex-start}
 
@@ -223,7 +233,7 @@ input,select,textarea{font:inherit;color:inherit}
 .fld{margin-bottom:14px}
 .fld label{display:block;font-size:12px;letter-spacing:.06em;color:var(--ink-2);margin-bottom:6px}
 .fld input,.fld textarea,.fld select{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px 14px;font-size:14.5px;outline:none}
-.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgba(39,86,122,.13)}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgba(28,90,116,.13)}
 .fld .err{color:var(--terra);font-size:12px;margin-top:5px}
 .fld.bad input,.fld.bad select{border-color:var(--terra)}
 .hint{font-family:var(--s);font-size:20px;color:var(--navy-300);text-align:center;margin-top:22px}
@@ -242,6 +252,23 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ---------- done ---------- */
 .done{text-align:center;padding:44px 26px}
+.comp{background:var(--sand);border-radius:var(--r);padding:16px;margin-top:12px}
+.comp h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6B5A3A;margin:0 0 8px}
+.comp p{font-size:13.5px;line-height:1.5;color:#3A2E1B;margin:0 0 12px}
+.comp .sub{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  background:var(--navy);color:var(--paper);border-radius:11px;padding:13px;
+  font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.comp .sub[disabled]{background:#C7D0D8;color:#F2EDE1}
+.comp .ok{display:flex;align-items:center;gap:9px;color:#1E4E36;font-size:14px;font-weight:600}
+.comp img{width:100%;border-radius:10px;margin-top:10px;display:block}
+.ayuda{background:var(--navy);color:var(--paper);border-radius:var(--r);padding:18px;margin-top:12px}
+.ayuda h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin:0 0 8px}
+.ayuda p{font-size:14px;line-height:1.55;margin:0 0 14px}
+.ayuda a{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--terra);
+  color:#fff;border-radius:11px;padding:13px;font-size:13.5px;font-weight:700;
+  text-decoration:none;letter-spacing:.05em}
+.ayuda .tel{display:block;text-align:center;margin-top:11px;font-size:15px;font-weight:700;
+  color:var(--paper);text-decoration:none;letter-spacing:.04em}
 .dtl{font-family:var(--d);font-size:27px;letter-spacing:.11em;text-transform:uppercase;font-weight:500;margin:16px 0 6px}
 .ordid{display:inline-flex;align-items:center;gap:10px;background:var(--sand);border-radius:11px;padding:12px 20px;font-size:14px;font-weight:700;letter-spacing:.12em;margin:20px 0 4px}
 .dgrid{display:flex;gap:10px;margin:20px 0 22px;text-align:left}
@@ -250,7 +277,7 @@ input,select,textarea{font:inherit;color:inherit}
 .dgrid .v{font-size:13.5px;font-weight:700;margin-top:4px;line-height:1.3}
 
 /* ---------- modal ---------- */
-.modal{position:absolute;inset:0;background:rgba(12,31,51,.62);display:none;align-items:center;justify-content:center;padding:24px;z-index:20}
+.modal{position:absolute;inset:0;background:rgba(0,34,47,.62);display:none;align-items:center;justify-content:center;padding:24px;z-index:20}
 .modal.on{display:flex}
 .mbox{background:var(--paper);border-radius:18px;width:100%;overflow:hidden}
 .mbox .mh{background:var(--navy);padding:18px;text-align:center;color:var(--paper);font-family:var(--d);font-weight:400;letter-spacing:.2em;text-indent:.2em;font-size:15px}
@@ -340,33 +367,23 @@ input,select,textarea{font:inherit;color:inherit}
 }
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logoma" viewBox="0 0 181.44 79.44"><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 84.700749 71.883196 C 64.878399 71.383605 44.859359 69.8927 25.379248 66.159537 C 18.255161 64.794513 15.159271 64.208379 12.429223 56.950543 C 8.397092 46.238842 8.188601 30.637445 13.117636 20.189308 C 15.867353 14.359436 19.439231 13.867713 25.288771 12.833127 C 66.388973 5.575291 111.777002 5.732642 152.979481 12.278463 C 160.036694 13.395658 165.461386 13.352387 168.7697 20.551216 C 171.566623 26.636784 172.601208 33.890686 172.294373 40.538785 C 172.01114 46.71483 170.449427 58.740415 165.622671 63.012508 C 162.459907 65.813364 155.508906 66.497842 151.343026 67.174454 C 133.593781 70.046118 115.533768 71.485884 97.572098 71.812388 C 97.35574 71.816322 97.159051 71.910733 96.942693 71.910733 Z M 83.430136 74.062514 L 98.488671 74.09005 C 98.701095 74.086117 98.901718 73.995639 99.114143 73.991706 C 118.047457 73.629797 138.172709 71.954004 156.779519 68.429332 C 164.324522 67.001367 168.399924 65.707151 171.432874 58.107076 C 175.866251 47.00593 176.330438 30.535166 171.011959 19.673982 C 167.074238 11.625454 160.815584 11.350089 152.794593 10.099145 C 112.736845 3.844425 70.15754 3.691007 30.091925 9.914257 C 25.044877 10.701015 18.215823 11.212407 14.313507 14.666271 C 8.314483 19.972949 6.520676 33.402897 6.862915 40.995104 C 7.177618 47.997244 9.022564 59.810405 14.584938 64.601757 C 18.192221 67.709449 24.820651 68.307384 29.454651 69.078406 C 47.286506 72.044481 65.346519 73.657334 83.430136 74.062514 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 26.103065 33.969362 L 26.103065 37.088854 C 26.103065 37.442895 25.619209 37.545174 25.473659 37.222603 L 23.841138 33.564182 C 23.683787 33.206207 23.325812 32.974114 22.936367 32.974114 L 22.869493 32.974114 C 22.480048 32.974114 22.126007 33.206207 21.964722 33.560248 L 20.3322 37.206868 C 20.18665 37.529439 19.706728 37.42716 19.706728 37.073119 L 19.706728 33.969362 C 19.706728 33.418632 19.26221 32.974114 18.715414 32.974114 L 15.973565 32.974114 C 15.473974 32.974114 15.06486 33.383228 15.06486 33.886752 L 15.06486 47.922503 C 15.06486 48.426027 15.473974 48.831207 15.973565 48.831207 L 20.304664 48.831207 C 20.666572 48.831207 20.993077 48.618783 21.138627 48.288345 L 22.779016 44.54338 C 22.897029 44.28375 23.266805 44.28375 23.380885 44.547314 L 24.98587 48.280477 C 25.13142 48.614849 25.457924 48.831207 25.823766 48.831207 L 29.832295 48.831207 C 30.335819 48.831207 30.740999 48.426027 30.740999 47.922503 L 30.740999 33.886752 C 30.740999 33.383228 30.335819 32.974114 29.832295 32.974114 L 27.094379 32.974114 C 26.543649 32.974114 26.103065 33.418632 26.103065 33.969362 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 38.738387 40.542719 L 38.124717 37.529439 C 38.093246 37.376021 38.21126 37.234405 38.364678 37.234405 L 39.131766 37.234405 C 39.289118 37.234405 39.407131 37.376021 39.375661 37.529439 Z M 40.331571 34.378476 L 40.31977 34.429615 C 40.225359 34.799391 39.890987 35.059021 39.50941 35.059021 L 38.03424 35.059021 C 37.640861 35.059021 37.302555 34.783656 37.219946 34.402078 C 37.133403 34.020501 36.795097 32.978048 36.401718 32.978048 L 32.821973 32.978048 C 32.259441 32.978048 31.854261 33.52091 32.01948 34.055905 L 36.374182 48.241139 C 36.480394 48.591246 36.802965 48.831207 37.17274 48.831207 L 41.433031 48.831207 C 41.798873 48.831207 42.121444 48.591246 42.23159 48.241139 L 46.582358 34.055905 C 46.747577 33.52091 46.346331 32.978048 45.783799 32.978048 L 41.141931 32.978048 C 40.760354 32.978048 40.429916 34.0087 40.331571 34.378476 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 54.662355 41.895942 C 55.091138 41.895942 55.350768 42.049359 55.468781 42.360128 C 55.728411 43.048541 55.118674 43.76449 54.383056 43.76449 L 53.584498 43.76449 C 53.446815 43.76449 53.336669 43.654344 53.336669 43.516662 L 53.336669 42.14377 C 53.336669 42.006088 53.446815 41.895942 53.584498 41.895942 Z M 55.929034 33.422565 L 53.800856 37.328815 C 53.674975 37.553041 53.336669 37.466498 53.336669 37.210802 L 53.336669 33.831679 C 53.336669 33.359625 52.951158 32.974114 52.479104 32.974114 L 48.718404 32.974114 C 48.246349 32.974114 47.860838 33.359625 47.860838 33.831679 L 47.860838 47.973642 C 47.860838 48.44963 48.246349 48.831207 48.718404 48.831207 L 55.515987 48.831207 C 58.686619 48.831207 61.282918 46.234908 61.062626 43.06821 C 60.936745 41.290138 60.275869 40.062797 59.056395 39.16196 C 58.954116 39.087218 58.922646 38.953469 58.981653 38.847257 C 59.367164 38.158844 60.712519 35.759235 61.562217 34.252594 C 61.880853 33.678262 61.467806 32.974114 60.810864 32.974114 L 56.680388 32.974114 C 56.369619 32.974114 56.078518 33.1472 55.929034 33.422565 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 63.021652 33.725467 L 63.021652 48.083788 C 63.021652 48.496835 63.356023 48.831207 63.769071 48.831207 L 67.769732 48.831207 C 68.182779 48.831207 68.517151 48.496835 68.517151 48.083788 L 68.517151 33.725467 C 68.517151 33.312419 68.182779 32.978048 67.769732 32.978048 L 63.769071 32.978048 C 63.356023 32.978048 63.021652 33.312419 63.021652 33.725467 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 76.557811 40.542719 L 75.94414 37.529439 C 75.91267 37.376021 76.02675 37.234405 76.184101 37.234405 L 76.95119 37.234405 C 77.108541 37.234405 77.226555 37.376021 77.191151 37.529439 Z M 78.150994 34.41388 L 78.139193 34.465019 C 78.044782 34.834795 77.71041 35.090491 77.328833 35.090491 L 75.853663 35.090491 C 75.460284 35.090491 75.121979 34.81906 75.039369 34.437482 C 74.952826 34.055905 74.61452 32.978048 74.221142 32.978048 L 70.637462 32.978048 C 70.078865 32.978048 69.673685 33.52091 69.838904 34.055905 L 74.193605 48.241139 C 74.299817 48.591246 74.622388 48.831207 74.992164 48.831207 L 79.248521 48.831207 C 79.618297 48.831207 79.940867 48.591246 80.051013 48.241139 L 84.401781 34.055905 C 84.567 33.52091 84.165754 32.978048 83.603223 32.978048 L 78.961354 32.978048 C 78.579777 32.978048 78.249339 34.044104 78.150994 34.41388 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 94.460473 33.359625 L 91.305577 38.217851 C 91.128556 38.493216 90.703707 38.367335 90.703707 38.040831 L 90.703707 33.819878 C 90.703707 33.355691 90.326064 32.974114 89.857943 32.974114 L 86.526026 32.974114 C 86.057905 32.974114 85.680262 33.355691 85.680262 33.819878 L 85.680262 47.985443 C 85.680262 48.453564 86.057905 48.831207 86.526026 48.831207 L 90.487349 48.831207 C 90.774515 48.831207 91.045947 48.685657 91.199364 48.441762 L 93.701253 44.527645 C 93.878273 44.25228 94.307056 44.378161 94.307056 44.704665 L 94.307056 47.985443 C 94.307056 48.453564 94.684699 48.831207 95.15282 48.831207 L 98.528009 48.831207 C 98.996129 48.831207 99.373773 48.453564 99.373773 47.985443 L 99.373773 33.819878 C 99.373773 33.355691 98.996129 32.974114 98.528009 32.974114 L 95.168555 32.974114 C 94.885322 32.974114 94.617825 33.119664 94.460473 33.359625 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 104.330344 33.902487 L 104.330344 43.221628 C 104.330344 43.520595 104.090383 43.76449 103.791415 43.76449 L 101.29346 43.76449 C 100.782068 43.76449 100.365087 44.177538 100.365087 44.68893 L 100.365087 47.906767 C 100.365087 48.41816 100.782068 48.831207 101.29346 48.831207 L 113.043681 48.831207 C 113.555073 48.831207 113.968121 48.41816 113.968121 47.906767 L 113.968121 44.68893 C 113.968121 44.177538 113.555073 43.76449 113.043681 43.76449 L 110.616534 43.76449 C 110.317567 43.76449 110.073672 43.520595 110.073672 43.221628 L 110.073672 33.902487 C 110.073672 33.391095 109.660624 32.974114 109.149232 32.974114 L 105.258717 32.974114 C 104.743391 32.974114 104.330344 33.391095 104.330344 33.902487 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 124.195966 40.904627 C 124.195966 43.135084 123.45248 44.05559 121.989111 44.05559 C 120.50214 44.05559 119.758654 43.135084 119.758654 40.904627 C 119.758654 38.67417 120.683094 37.773333 121.989111 37.773333 C 123.275459 37.773333 124.195966 38.67417 124.195966 40.904627 M 114.286757 40.904627 C 114.286757 45.90447 117.213494 49.102638 121.989111 49.102638 C 126.741125 49.102638 129.648194 45.90447 129.648194 40.904627 C 129.648194 35.767102 126.741125 32.683014 121.989111 32.683014 C 117.213494 32.683014 114.286757 35.767102 114.286757 40.904627 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 139.592806 33.336022 L 136.422174 38.217851 C 136.245154 38.493216 135.820305 38.367335 135.820305 38.040831 L 135.820305 33.772672 C 135.820305 33.332088 135.46233 32.978048 135.02568 32.978048 L 131.591484 32.978048 C 131.154834 32.978048 130.796859 33.332088 130.796859 33.772672 L 130.796859 48.036582 C 130.796859 48.477166 131.154834 48.831207 131.591484 48.831207 L 135.631483 48.831207 C 135.902914 48.831207 136.154676 48.693525 136.300227 48.465365 L 138.81785 44.527645 C 138.99487 44.25228 139.423653 44.378161 139.423653 44.704665 L 139.423653 48.036582 C 139.423653 48.477166 139.777694 48.831207 140.218278 48.831207 L 143.695745 48.831207 C 144.136329 48.831207 144.49037 48.477166 144.49037 48.036582 L 144.49037 33.772672 C 144.49037 33.332088 144.136329 32.978048 143.695745 32.978048 L 140.26155 32.978048 C 139.990118 32.978048 139.738356 33.111796 139.592806 33.336022 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 146.386455 33.729401 L 146.386455 48.079854 C 146.386455 48.492902 146.720827 48.831207 147.137808 48.831207 L 151.126668 48.831207 C 151.543649 48.831207 151.881955 48.492902 151.881955 48.079854 L 151.881955 33.729401 C 151.881955 33.312419 151.543649 32.974114 151.126668 32.974114 L 147.137808 32.974114 C 146.720827 32.974114 146.386455 33.312419 146.386455 33.729401 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 159.922615 40.542719 L 159.308944 37.529439 C 159.27354 37.376021 159.391553 37.234405 159.548905 37.234405 L 160.312059 37.234405 C 160.473345 37.234405 160.587424 37.376021 160.555954 37.529439 Z M 161.515798 34.378476 L 161.503997 34.429615 C 161.405652 34.799391 161.075214 35.055087 160.693637 35.055087 L 159.218467 35.055087 C 158.825088 35.055087 158.486782 34.783656 158.400239 34.402078 C 158.313696 34.020501 157.97539 32.978048 157.585945 32.978048 L 154.002266 32.978048 C 153.439734 32.978048 153.038488 33.52091 153.203707 34.055905 L 157.554475 48.241139 C 157.664621 48.591246 157.987192 48.831207 158.353034 48.831207 L 162.613325 48.831207 C 162.979167 48.831207 163.305671 48.591246 163.411883 48.241139 L 167.766585 34.055905 C 167.931804 33.52091 167.526624 32.978048 166.964092 32.978048 L 162.326158 32.978048 C 161.944581 32.978048 161.610209 34.0087 161.515798 34.378476 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/><path fill-rule="nonzero" fill="currentColor" stroke-width="0.24" stroke-linecap="butt" stroke-linejoin="round" stroke="currentColor" stroke-miterlimit="10" d="M 166.110461 49.661236 L 166.358289 49.661236 C 166.523508 49.661236 166.637588 49.688773 166.704462 49.739912 C 166.771337 49.794985 166.806741 49.861859 166.806741 49.948403 C 166.806741 50.031012 166.775271 50.10182 166.708396 50.152959 C 166.645456 50.204099 166.53531 50.231635 166.381892 50.231635 L 166.110461 50.231635 Z M 165.540062 50.632881 L 166.56678 50.632881 C 166.853946 50.632881 167.066371 50.573875 167.196186 50.455861 C 167.326001 50.337847 167.388941 50.180496 167.388941 49.983807 C 167.388941 49.834323 167.341736 49.700574 167.239457 49.586494 C 167.141113 49.476348 166.987695 49.393739 166.771337 49.342599 C 166.861814 49.311129 166.924755 49.275725 166.964092 49.236387 C 167.023099 49.185248 167.08604 49.106572 167.14898 49.004294 C 167.152914 48.996426 167.274862 48.776134 167.518756 48.343418 L 166.846079 48.343418 C 166.625787 48.776134 166.480237 49.039698 166.405495 49.122307 C 166.330753 49.208851 166.256011 49.252122 166.181269 49.252122 C 166.165534 49.252122 166.141931 49.248189 166.110461 49.244255 L 166.110461 48.343418 L 165.540062 48.343418 Z M 168.238639 49.48815 C 168.238639 49.964138 168.069486 50.369318 167.735115 50.707623 C 167.396809 51.045929 166.987695 51.215082 166.511707 51.215082 C 166.035719 51.215082 165.626605 51.045929 165.288299 50.707623 C 164.953927 50.369318 164.784775 49.964138 164.784775 49.48815 C 164.784775 49.008228 164.953927 48.603048 165.288299 48.264742 C 165.626605 47.926436 166.035719 47.757283 166.511707 47.757283 C 166.987695 47.757283 167.396809 47.926436 167.735115 48.264742 C 168.069486 48.603048 168.238639 49.008228 168.238639 49.48815 M 168.655621 49.48815 C 168.655621 49.102638 168.56121 48.744664 168.368454 48.414226 C 168.175699 48.083788 167.916069 47.824158 167.585631 47.631402 C 167.251259 47.442581 166.893284 47.344236 166.511707 47.344236 C 166.13013 47.344236 165.772155 47.442581 165.441717 47.631402 C 165.111279 47.824158 164.851649 48.083788 164.658894 48.414226 C 164.466138 48.744664 164.371727 49.102638 164.371727 49.48815 C 164.371727 49.869727 164.466138 50.223768 164.658894 50.558139 C 164.851649 50.888578 165.111279 51.152141 165.441717 51.340963 C 165.772155 51.533719 166.13013 51.628129 166.511707 51.628129 C 166.893284 51.628129 167.251259 51.533719 167.585631 51.340963 C 167.916069 51.152141 168.175699 50.888578 168.368454 50.558139 C 168.56121 50.223768 168.655621 49.869727 168.655621 49.48815 " transform="matrix(0.993, 0, 0, -0.993, 0.357, 78.88392)"/></symbol></svg>
+
 <div class="stage"><div class="phone" id="phone">
 
 <!-- HOME -->
 <section class="scr on" id="s-home">
   <div class="body"><div class="home">
-    <div class="crest">
-      <svg viewBox="0 0 64 64" fill="none" stroke="#153350" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 20c0-5 3.5-8.5 8-8.5s8 3.5 8 8.5c0 4.5-2.5 7-2.5 7"/>
-        <path d="M22.5 21c-1.5.5-2 2-1.2 3.2.7 1 2 1.2 3 .5"/>
-        <path d="M20 33c-3 2-5 6-5.5 11.5-.3 3.5 0 6 .4 8h34c.4-3 .5-6.5-.3-10"/>
-        <path d="M28 27c-3 1-6 3-8 6"/>
-        <path d="M36.5 27.5c2 .5 4 1.5 5.5 2.8"/>
-        <ellipse cx="46" cy="25" rx="9.5" ry="3.6"/>
-        <path d="M41 23.5c1-1.2 2.5-2 4-2M48 22c1.6.4 2.8 1.2 3.5 2"/>
-        <path d="M36.5 29c2-1.5 5-3.2 8-3.6"/>
-      </svg>
-    </div>
-    <h1 class="wordmark">MARIANTONIA</h1>
+    <h1 style="margin:0"><svg class="logo" role="img" aria-label="Mariantonia"><use href="#logoma"/></svg></h1>
     <div class="subword">Pastas frescas</div>
     <div class="barrioNom" id="barrioNom"></div>
     <div class="rule"></div>
     <div class="strip">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-      <div><b id="stripDate"></b><span id="stripCierre"></span></div>
+      <div><b id="stripDate">Cargando el menú…</b><span id="stripCierre"></span></div>
     </div>
     <div class="homecards">
-      <button class="hcard navy" onclick="go('cat')">
+      <button class="hcard navy" id="btnPedir" disabled onclick="go('cat')">
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.4 12.2a2 2 0 002 1.6h8.3a2 2 0 002-1.6L21 8H6"/><circle cx="10" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>
         <div><b>Realizá tu pedido</b><span>Elegí tus pastas favoritas</span></div>
         <span class="gro">›</span>
@@ -387,9 +404,8 @@ input,select,textarea{font:inherit;color:inherit}
 <section class="scr" id="s-cat">
   <div class="bar">
     <button class="icb" onclick="go('home')" aria-label="Volver">‹</button>
-    <div style="flex:1;text-align:center">
-      <div style="font-family:var(--d);font-size:16px;font-weight:400;letter-spacing:.2em;text-indent:.2em">MARIANTONIA</div>
-      <div style="font-size:8px;letter-spacing:.26em;opacity:.65;margin-top:3px">PASTAS ARTESANALES</div>
+    <div style="flex:1;display:flex;justify-content:center">
+      <svg class="logo" role="img" aria-label="Mariantonia"><use href="#logoma"/></svg>
     </div>
     <button class="icb" onclick="go('cart')" aria-label="Ver pedido"><span class="wrapdot">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.4 12.2a2 2 0 002 1.6h8.3a2 2 0 002-1.6L21 8H6"/><circle cx="10" cy="21" r="1.2"/><circle cx="18" cy="21" r="1.2"/></svg>
@@ -436,9 +452,9 @@ input,select,textarea{font:inherit;color:inherit}
   </div>
   <div class="body"><div class="pad">
     <div id="recordado"></div>
+    <div id="avisoEntrega"></div>
     <div class="fld"><label for="f-nom">Nombre y apellido</label><input id="f-nom" placeholder="Como querés que te llamemos" autocomplete="name"></div>
     <div class="fld"><label for="f-tel">Teléfono / WhatsApp</label><input id="f-tel" placeholder="11 1234 5678" inputmode="tel" autocomplete="tel"></div>
-    <div class="fld"><label for="f-dir">Piso y departamento <span class="opt">opcional</span></label><input id="f-dir" placeholder="Ej: 4° B" autocomplete="address-line2"></div>
     <div class="fld"><label for="f-obs">Comentarios <span class="opt">opcional</span></label><textarea id="f-obs" rows="3" placeholder="Ej: horario de entrega, timbre, referencias"></textarea></div>
     <button class="btn" onclick="submitForm()">Siguiente
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
@@ -467,14 +483,13 @@ input,select,textarea{font:inherit;color:inherit}
 <!-- DONE -->
 <section class="scr" id="s-done">
   <div class="body"><div class="done">
-    <div class="crest" style="width:88px;height:88px;margin-bottom:0">
-      <svg viewBox="0 0 64 64" fill="none" stroke="#153350" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:52px;height:52px">
-        <path d="M23 20c0-5 3.5-8.5 8-8.5s8 3.5 8 8.5c0 4.5-2.5 7-2.5 7"/><path d="M22.5 21c-1.5.5-2 2-1.2 3.2.7 1 2 1.2 3 .5"/><path d="M20 33c-3 2-5 6-5.5 11.5-.3 3.5 0 6 .4 8h34c.4-3 .5-6.5-.3-10"/><path d="M28 27c-3 1-6 3-8 6"/><path d="M36.5 27.5c2 .5 4 1.5 5.5 2.8"/><ellipse cx="46" cy="25" rx="9.5" ry="3.6"/><path d="M41 23.5c1-1.2 2.5-2 4-2M48 22c1.6.4 2.8 1.2 3.5 2"/><path d="M36.5 29c2-1.5 5-3.2 8-3.6"/>
-      </svg>
-    </div>
+    <svg class="logo chico" role="img" aria-label="Mariantonia"><use href="#logoma"/></svg>
     <h2 class="dtl">¡Pedido listo!</h2>
     <p class="script" id="doneName" style="margin:0"></p>
     <p style="font-size:14px;color:var(--ink-2);line-height:1.55;margin:12px 0 0">Ya lo recibimos.<br>Te escribimos si hace falta algo.</p>
+    <div id="doneAviso" style="margin-top:18px;text-align:left"></div>
+    <div id="doneComp" style="text-align:left"></div>
+    <div id="doneAyuda" style="text-align:left"></div>
     <div class="ordid">PEDIDO <span id="doneId"></span></div>
     <div class="dgrid">
       <div><div class="k">Entrega</div><div class="v" id="doneWhen"></div></div>
@@ -499,7 +514,7 @@ input,select,textarea{font:inherit;color:inherit}
 <!-- SIN BARRIO -->
 <section class="scr" id="s-nada">
   <div class="body"><div class="home">
-    <h1 class="wordmark">MARIANTONIA</h1>
+    <h1 style="margin:0"><svg class="logo" role="img" aria-label="Mariantonia"><use href="#logoma"/></svg></h1>
     <div class="subword">Pastas frescas</div>
     <div class="rule"></div>
     <p id="nadaMsg" style="font-size:14.5px;color:var(--ink-2);line-height:1.6;margin:22px 0 0">
@@ -513,7 +528,7 @@ input,select,textarea{font:inherit;color:inherit}
 <!-- LOCALES -->
 <div class="modal" id="mLoc" onclick="if(event.target===this)closeLoc()">
   <div class="mbox">
-    <div class="mh">MARIANTONIA</div>
+    <div class="mh"><svg class="logo" role="img" aria-label="Mariantonia"><use href="#logoma"/></svg></div>
     <div class="mbody">
       <div id="locList"></div>
       <button class="btn" style="margin-top:20px" onclick="closeLoc()">Cerrar</button>
@@ -588,6 +603,8 @@ async function arrancar(){
 }
 
 function pintarTodo(){
+  $('#btnPedir').disabled = false;
+  document.querySelector('.strip').classList.remove('cargando');
   $('#stripDate').textContent = 'Entrega el ' + proxEntrega();
   $('#stripCierre').textContent = 'Pedí hasta el ' + NEGOCIO.cierre;
   $('#barrioNom').textContent = BARRIO ? BARRIO.nombre : '';
@@ -600,6 +617,7 @@ function pintarTodo(){
 }
 
 function cargando(){
+  document.querySelector('.strip').classList.add('cargando');
   $('#catlist').innerHTML = '<div class="empty"><div class="script">Cargando el menú…</div></div>';
 }
 
@@ -616,10 +634,10 @@ const cart = {};
 let curProd = null, prevScr = 'cat', scr = 'home';
 let abiertaCat = null, scrollCat = 0;
 const modo = 'envio';   // esta app es solo entrega a domicilio
-const cliente = { nom:'', tel:'', dir:'', obs:'' };
+const cliente = { nom:'', tel:'', obs:'' };
 
 /* ============ UTILIDADES ============ */
-const VERSION = 'v2.0';
+const VERSION = 'v2.4';
 const $ = s => document.querySelector(s);
 const money = n => '$' + Math.round(n).toLocaleString('es-AR');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -785,6 +803,7 @@ function siguienteModulo(c){
 }
 
 // Para el carrito: lo que todavía no miró, empezando por los complementos.
+// Primero uno de cada módulo, y después un segundo de cada uno hasta llenar.
 function sugerencias(){
   const pref = ['sal','ext','vin','pos'];
   const vivos = modulosVivos().filter(c => enCarrito(c) === 0);
@@ -792,18 +811,25 @@ function sugerencias(){
     const ia = pref.indexOf(a.id), ib = pref.indexOf(b.id);
     return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib);
   });
-  const out = [];
-  vivos.forEach(c => {
-    if (out.length >= 6) return;
-    const items = ITEMS.filter(i => i.catId === c.id && itemOn(i.key));
-    const pick = items.find(i => i.top) || items[0];
-    if (pick) out.push({...pick, nombre: pick.nombreFull});
-  });
+
+  // Lo destacado primero dentro de cada módulo.
+  const porModulo = vivos.map(c => ITEMS
+    .filter(i => i.catId === c.id && itemOn(i.key))
+    .sort((a,b) => (b.top ? 1 : 0) - (a.top ? 1 : 0)));
+
+  const out = [], TOPE = 12;
+  for (let vuelta = 0; vuelta < 3 && out.length < TOPE; vuelta++){
+    for (let m = 0; m < porModulo.length && out.length < TOPE; m++){
+      const i = porModulo[m][vuelta];
+      if (i) out.push({...i, nombre: i.nombreFull});
+    }
+  }
   return out;
 }
 
 /* ============ NAVEGACIÓN ============ */
 function go(n){
+  if ((n === 'cat' || n === 'cart') && !CATALOGO.length) return;
   if (n === 'prod') prevScr = scr;
   document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
   $('#s-' + n).classList.add('on');
@@ -1000,7 +1026,7 @@ function renderCart(){
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M4 7.5l16 9M20 7.5l-16 9"/></svg>' +
       (nFrz === frzables.length ? 'Volver todo a fresco' : 'Marcar todo para freezar') + '</button>';
     h += '<div class="note" style="margin-top:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="flex-shrink:0"><path d="M12 3v18M4 7.5l16 9M20 7.5l-16 9"/></svg>' +
-      '<div>Lo que marques para freezar te lo preparamos para que aguante: <b>ñoquis y fideos en bolsas chicas</b>, <b>ravioles y sorrentinos con film en vez de papel</b>. Pasamos una vez por semana — podés stockearte tranquilo.</div></div>';
+      '<div>Lo que marques para freezar te lo preparamos para que aguante: <b>ñoquis y fideos en bolsas chicas</b>, <b>ravioles y sorrentinos con film en vez de papel</b>. Pasamos una vez por semana — podés stockearte tranquila/o.</div></div>';
   }
 
   const e = envio(), falta = NEGOCIO.envioGratisDesde - subtotal();
@@ -1059,11 +1085,93 @@ function leerCliente(){
 }
 const clienteListo = () => cliente.nom.length > 2 && cliente.tel.replace(/\D/g,'').length >= 8;
 
+// El comprobante se adjunta después de confirmar: el pedido ya tiene número.
+function bloqueComprobante(){
+  return '<div class="comp" id="compBox">' +
+    '<h4>Comprobante de transferencia</h4>' +
+    '<p>Subí la captura y la sucursal lo da por pagado. ' +
+    'Si no, te lo vamos a pedir el día de la entrega.</p>' +
+    '<input type="file" id="compFile" accept="image/*" hidden onchange="subirComprobante(this)">' +
+    '<button class="sub" onclick="document.getElementById(\'compFile\').click()">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 17v3h16v-3"/></svg>' +
+      'Adjuntar captura</button></div>';
+}
+
+function bloqueAyuda(){
+  const tel = SUCURSAL && SUCURSAL.telefono ? SUCURSAL.telefono : '';
+  const solo = tel.replace(/\D/g, '');
+  return '<div class="ayuda">' +
+    '<h4>Cualquier cosa, avisanos</h4>' +
+    '<p>Si tenés una duda, un problema, un faltante o algo que no salió como esperabas, ' +
+    'escribinos. Lo resolvemos en el momento.</p>' +
+    (solo
+      ? '<a href="https://wa.me/' + esc(solo) + '" target="_blank" rel="noopener">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 01-11.9 7L4 20l1.1-4A8 8 0 1120 12z"/></svg>' +
+        'Escribinos por WhatsApp</a>' +
+        '<a class="tel" href="tel:' + esc(solo) + '">' + esc(tel) + '</a>'
+      : '<p style="opacity:.7;margin:0">Consultá en ' + esc((SUCURSAL || {}).nombre || 'tu sucursal') + '.</p>') +
+    '</div>';
+}
+
+// Se achica antes de mandarla: una captura de celular pesa de más y tarda.
+function achicar(file, maxLado, calidad){
+  return new Promise(function(resolve, reject){
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function(){
+      const esc2 = Math.min(1, maxLado / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * esc2);
+      c.height = Math.round(img.height * esc2);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', calidad));
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('no se pudo leer la imagen')); };
+    img.src = url;
+  });
+}
+
+async function subirComprobante(input){
+  const file = input.files && input.files[0];
+  if (!file || !ultimoId) return;
+  const caja = $('#compBox');
+  caja.innerHTML = '<h4>Comprobante de transferencia</h4><p>Subiendo…</p>';
+  try {
+    const data = await achicar(file, 1400, 0.72);
+    const r = await fetch(BACKEND, {
+      method:'POST', redirect:'follow',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'comprobante', id: ultimoId, data: data }),
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    caja.innerHTML = '<div class="ok">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 7"/></svg>' +
+      'Comprobante recibido</div><img src="' + data + '" alt="">';
+  } catch(e){
+    caja.innerHTML = '<h4>Comprobante de transferencia</h4>' +
+      '<p>No se pudo subir: ' + esc(e.message) + '</p>' +
+      '<input type="file" id="compFile" accept="image/*" hidden onchange="subirComprobante(this)">' +
+      '<button class="sub" onclick="document.getElementById(\'compFile\').click()">Probar de nuevo</button>';
+  }
+}
+
+function avisoEntrega(){
+  if (!BARRIO) return '';
+  return '<div class="note" style="margin-bottom:16px">' +
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="flex-shrink:0"><path d="M2 7h11v9H2zM13 10h4l4 3.5V16h-8z"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>' +
+    '<div>El vehículo con los pedidos queda en el <b>playón del estacionamiento</b> el ' +
+    '<b>' + proxEntrega() + '</b>' +
+    (BARRIO.horaEntrega ? ' de <b>' + esc(BARRIO.horaEntrega) + '</b>' : '') +
+    '. Pasá a retirarlo en ese rato.</div></div>';
+}
+
 function renderForm(){
   $('#f-nom').value = cliente.nom;
   $('#f-tel').value = cliente.tel;
-  $('#f-dir').value = cliente.dir;
   $('#f-obs').value = cliente.obs;
+  $('#avisoEntrega').innerHTML = avisoEntrega();
   $('#recordado').innerHTML = clienteListo()
     ? '<div class="note" style="margin-bottom:16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="flex-shrink:0"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4-5.5 7-5.5s5.5 1.5 7 5.5"/></svg>' +
       'Son los datos de tu último pedido. Cambialos si hace falta.</div>'
@@ -1075,7 +1183,6 @@ function seguir(){ go(clienteListo() ? 'sum' : 'form'); }
 function submitForm(){
   cliente.nom = $('#f-nom').value.trim();
   cliente.tel = $('#f-tel').value.trim();
-  cliente.dir = $('#f-dir').value.trim();
   cliente.obs = $('#f-obs').value.trim();
   let ok = true;
   const bad = (id, on) => { $(id).closest('.fld').classList.toggle('bad', on); if (on) ok = false; };
@@ -1097,7 +1204,7 @@ function renderSum(){
     '<div class="block"><h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4-5.5 7-5.5s5.5 1.5 7 5.5"/></svg>Datos del cliente' +
       '<button class="edit" style="margin-left:auto" onclick="go(\'form\')">Editar</button></h3>' +
       '<div style="font-size:14px;line-height:1.6">'+esc(cliente.nom)+'<br>'+esc(cliente.tel)+'<br>' +
-      (cliente.dir ? esc(cliente.dir) : '') +
+
       (cliente.obs ? '<br><span style="color:var(--ink-2)">'+esc(cliente.obs)+'</span>' : '') + '</div></div>' +
 
     '<div class="block"><h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6"/></svg>Pedido' +
@@ -1107,8 +1214,7 @@ function renderSum(){
       '<div class="kv" style="margin-top:6px"><span class="k">Envío</span><span>'+(envio() === 0 ? 'Sin cargo' : money(envio()))+'</span></div>' +
       '<div class="sums"><div class="tt"><span>Total</span><span>'+money(total())+'</span></div></div></div>' +
 
-    '<div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>' +
-      '<div><b>Entrega</b><br>'+proxEntrega()+'</div></div>' +
+    avisoEntrega() +
 
     '<button class="btn terra" style="margin-top:16px" onclick="go(\'pago\')">Ir al pago' +
       '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>' +
@@ -1122,7 +1228,7 @@ async function mandarPedido(){
     action: 'pedido',
     barrio: BARRIO.slug,
     nombre: cliente.nom, telefono: cliente.tel,
-    pisoDepto: cliente.dir, comentarios: cliente.obs,
+    comentarios: cliente.obs,
     pago: pago,
     items: ls.map(function(l){ return { key:l.key, qty:l.qty, cons: esFrz(l.key) ? 'freezer' : 'fresco' }; }),
   };
@@ -1165,7 +1271,9 @@ function renderPago(){
   if (pago === 'transferencia'){
     h += '<div class="aliasbox"><div class="k">Alias</div><div class="v">'+esc(NEGOCIO.alias)+'</div>' +
       '<div class="k" style="margin-top:9px">Titular</div><div class="tt">'+esc(NEGOCIO.titular)+'</div>' +
-      '<button id="aliasBtn" class="cp" onclick="copiarAlias()">Copiar alias</button></div>';
+      '<button id="aliasBtn" class="cp" onclick="copiarAlias()">Copiar alias</button>' +
+      '<div style="font-size:12.5px;color:#5A4A2E;margin-top:12px;line-height:1.45">' +
+      'Después de confirmar vas a poder adjuntar la captura de la transferencia.</div></div>';
   }
   h += NEGOCIO.mercadoPago
     ? opt('mp', 'Mercado Pago', 'Tarjeta de crédito, débito o dinero en cuenta')
@@ -1204,6 +1312,9 @@ async function confirmar(){
   $('#doneWhen').textContent = new Date(r.entrega).toLocaleDateString('es-AR',
     { weekday:'long', day:'numeric', month:'long' });
   $('#doneTot').textContent = money(r.total);
+  $('#doneAviso').innerHTML = avisoEntrega();
+  $('#doneComp').innerHTML = pago === 'transferencia' ? bloqueComprobante() : '';
+  $('#doneAyuda').innerHTML = bloqueAyuda();
   borrarCarrito();
   if (btn){ btn.disabled = false; btn.textContent = 'Confirmar pedido'; }
   go('done');
