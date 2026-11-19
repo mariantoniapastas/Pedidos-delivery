@@ -115,6 +115,93 @@ habilitado. Ese es el tuyo: no hace falta repartirlo.
 
 Los pedidos nunca se mezclan: se filtran por sucursal **y** por fecha de entrega.
 
+## La lista de precios
+
+Los precios de pastas y salsas son **los mismos para todas las sucursales**. Viven en
+`Lista.gs`, un archivo aparte dentro del mismo proyecto de Apps Script.
+
+Para actualizar precios: editás los números en `Lista.gs` y ejecutás **`cargarLista()`** una
+vez desde el editor. Antes conviene correr **`simularLista()`**, que no escribe nada y te dice
+qué iría a agregar.
+
+`cargarLista()` actualiza precio, unidad, formatos y conservación de lo que ya está, y agrega
+lo que falta. **Nunca borra ni desactiva nada**, y no toca fotos, descripciones, destacados ni
+disponibilidad. Al terminar, el registro (Ver → Registros) te dice:
+
+- cuántos actualizó y agregó por sucursal;
+- los que están escritos distinto que en la lista y por eso quedaron **duplicados** (por
+  ejemplo "Ricota" en la planilla contra "Ricotta" en la lista) — esos los unificás a mano;
+- los que están en la planilla y no en la lista (Extras, Vinoteca, Postres y cualquier otro).
+
+Los módulos que se venden **por kilo** (Fideos, Ñoquis, Hecho a mano) llevan el medio kilo
+calculado solo: la mitad del precio redondeada hacia arriba a los $50. No hay que cargarlo.
+
+### El teléfono de cada sucursal
+
+La pantalla final del pedido muestra un cartel de contacto con el **WhatsApp y el teléfono de
+la sucursal que entrega**. Sale de la columna `telefono` de la pestaña `Sucursales`, una fila
+por sucursal. Si está vacía, el cartel solo dice la dirección.
+
+El número se escribe como lo marcarías desde un celular — `11 5555-5555`, `011 15 5555-5555` o
+`+54 9 11 5555-5555`, todo sirve. La app le agrega el código de país y el 9 de celular para
+armar el link de WhatsApp.
+
+### El orden de los productos
+
+Lo manda la columna `orden` de `Productos`. En el portal, pestaña **Catálogo**, cada producto
+tiene flechas ▲▼ para subirlo o bajarlo. Se mueve **dentro de su grupo**: un raviol casero no
+se mete entre los tradicionales ni una salsa entre los ñoquis. Por eso el portal muestra el
+nombre del grupo cuando un módulo tiene más de uno, y las flechas de los extremos quedan
+apagadas.
+
+La primera vez que movés algo, el backend numera todo el catálogo de esa sucursal (10, 20,
+30…) respetando el orden que tenía. De ahí en más, mover es intercambiar dos números.
+
+Si preferís acomodar arrastrando filas en la planilla, **borrá antes la columna `orden`
+entera**: mientras tenga números, mandan ellos y no la posición de la fila.
+
+### Nunca copies la columna `id`
+
+Cada producto se identifica por su `id`, y es lo que el portal usa para saber a cuál le estás
+tocando el precio o el interruptor. Si copiás una fila para crear otra, queda el id repetido y
+el portal termina editando siempre el primero de los dos. Si vas a duplicar filas, **borrá el
+id de las copias**: el backend le pone uno nuevo y único a cada fila vacía o repetida la
+próxima vez que una sucursal abre el Catálogo. Borrar ids no rompe nada — los pedidos viejos
+guardan el nombre del producto, no su id.
+
+Un producto nuevo creado desde el portal entra **al final de su grupo**, no al final de todo.
+
+Las **categorías** también se mueven: las flechas chiquitas a la izquierda del nombre del
+módulo lo suben o bajan entero, con todos sus productos adentro. Sirve cuando creás un módulo
+nuevo —que siempre nace último— y lo querés más arriba. Al mover una categoría se renumera
+todo el catálogo de esa sucursal de 10 en 10, respetando el orden interno de cada una.
+
+Si querés que el catálogo quede igual que la lista impresa, ejecutá una vez
+**`ordenarComoLaLista()`** desde el editor. Es aparte de `cargarLista()` a propósito:
+actualizar precios nunca te desarma un orden que acomodaste a mano.
+
+### Cómo decide la app qué va al freezer
+
+Lo define la columna `conservacion` de cada producto, no el módulo:
+
+### Precio, unidad y formatos
+
+Son excluyentes. Si la columna `formatos` tiene algo, **el precio y la unidad del producto se
+ignoran**: el cliente elige entre los formatos y cada uno entra como una línea distinta del
+pedido. El primero de la lista es el que ve por defecto.
+
+Se escriben `nombre=precio` separados por `;` — por ejemplo `Mediano=59000;Grande=79000` o
+`1/2 kg=8300;1 kg=16600`. Los espacios no molestan. Conviene dejar el precio y la unidad
+cargados igual: si algún día borrás los formatos, el producto sigue funcionando con esos
+valores en vez de quedar en $0.
+
+| Valor | Qué hace la app |
+|---|---|
+| `preparar` | Muestra el selector Fresco / Freezer. Si elige freezer, la fábrica lo empaca distinto |
+| `apto` | Sin selector: ya viene en un formato que aguanta el freezer (salsas) |
+| `congelado` | Sin selector: ya viene congelado (Línea congelada) |
+| `no` | Sin selector |
+
 ## Cambios en un pedido ya hecho
 
 **Los hace la sucursal, no el cliente.** La app no deja modificar un pedido confirmado: en la
@@ -143,4 +230,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.8` (app) y `v1.7` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v3.0` (app) y `v1.9` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.

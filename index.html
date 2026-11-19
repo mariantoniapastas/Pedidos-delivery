@@ -637,7 +637,7 @@ const modo = 'envio';   // esta app es solo entrega a domicilio
 const cliente = { nom:'', tel:'', obs:'' };
 
 /* ============ UTILIDADES ============ */
-const VERSION = 'v2.8';
+const VERSION = 'v3.0';
 const $ = s => document.querySelector(s);
 const money = n => '$' + Math.round(n).toLocaleString('es-AR');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -771,16 +771,26 @@ function repetir(){
 }
 
 /* ============ CONSERVACIÓN Y RECORRIDO ============ */
-// Qué módulos se pueden freezar (define cómo los prepara la fábrica).
-const FREEZER = { rav:1, sor:1, noq:1, fid:1, can:1, las:1, sal:1 };
-const freezable = catId => !!FREEZER[catId];
+// Lo decide cada producto con su columna `conservacion`:
+//   preparar  → fresco, la fábrica lo empaca distinto si va al freezer
+//   apto      → ya viene en formato freezable (salsas): no hay nada que avisar
+//   congelado → ya viene congelado
+//   no        → no va al freezer
+// Las filas viejas sin conservación cargada caen al mapa de abajo.
+const FREEZER = { rav:1, sor:1, noq:1, fid:1, can:1, las:1, mano:1 };
+function freezable(it){
+  if (!it) return false;
+  const c = String(it.conservacion || '').trim();
+  return c ? c === 'preparar' : !!FREEZER[it.catId];
+}
+const moduloFreezable = catId => ITEMS.some(i => i.catId === catId && freezable(i));
 const conserva = {};                 // key -> 'freezer'
 const vistos = {};                   // módulos que el cliente ya abrió
 
 const esFrz = k => conserva[k] === 'freezer';
 function setCons(k, v){ if (v === 'freezer') conserva[k] = 'freezer'; else delete conserva[k]; guardarCarrito(); renderCart(); }
 function todoFreezer(){
-  const ls = lines().filter(l => freezable(l.catId));
+  const ls = lines().filter(freezable);
   const todos = ls.every(l => esFrz(l.key));
   ls.forEach(l => { if (todos) delete conserva[l.key]; else conserva[l.key] = 'freezer'; });
   guardarCarrito(); renderCart();
@@ -796,7 +806,7 @@ function siguienteModulo(c){
   if (c.finRecorrido) return null;
   const vivos = modulosVivos();
   const salsa = vivos.find(x => x.id === 'sal');
-  if (freezable(c.id) && c.id !== 'sal' && salsa && enCarrito(salsa) === 0) return salsa;
+  if (moduloFreezable(c.id) && c.id !== 'sal' && salsa && enCarrito(salsa) === 0) return salsa;
   const i = vivos.findIndex(x => x.id === c.id);
   const orden = vivos.slice(i+1).concat(vivos.slice(0, i));
   return orden.find(x => !vistos[x.id]) || orden.find(x => enCarrito(x) === 0) || null;
@@ -1011,7 +1021,7 @@ function renderCart(){
         '<div class="un">'+l.qty+' × '+money(l.precio)+'</div></div>' +
       '<div class="amt">'+money(l.sub)+'</div>' +
       '<div class="cb">' + stepper(l.key, l.qty) +
-        (freezable(l.catId)
+        (freezable(l)
           ? '<div class="cons">' +
               '<button class="'+(frz ? '' : 'on')+'" onclick="setCons(\''+jsq(l.key)+'\',\'fresco\')">Fresco</button>' +
               '<button class="'+(frz ? 'on frz' : '')+'" onclick="setCons(\''+jsq(l.key)+'\',\'freezer\')">' +
@@ -1021,7 +1031,7 @@ function renderCart(){
       '</div></div>';
   }).join('');
 
-  const frzables = ls.filter(l => freezable(l.catId));
+  const frzables = ls.filter(freezable);
   const nFrz = frzables.filter(l => esFrz(l.key)).length;
   if (frzables.length){
     h += '<button class="allfrz" onclick="todoFreezer()">' +
@@ -1099,19 +1109,47 @@ function bloqueComprobante(){
       'Adjuntar captura</button></div>';
 }
 
+/**
+ * WhatsApp necesita el número con código de país y, en Argentina, con el 9
+ * de celular. Acá se arma desde lo que la sucursal escribió en la planilla,
+ * sea "11 5555-5555", "011 15 5555-5555" o "+54 9 11 5555-5555".
+ */
+function waAr(tel){
+  let n = String(tel || '').replace(/\D/g, '');
+  if (n.length < 8) return '';
+  if (n.indexOf('54') === 0 && n.length >= 12){
+    return n.charAt(2) === '9' ? n : '549' + n.slice(2);
+  }
+  n = n.replace(/^0+/, '');            // 011… → 11…
+  // El viejo 15 se saca solo si al sacarlo queda un número de 10 dígitos.
+  // Si no, un área como 221 (La Plata) se rompería sola.
+  if (n.length > 10){
+    for (let a = 2; a <= 4; a++){
+      if (n.substr(a, 2) === '15' && n.length - 2 === 10){
+        n = n.slice(0, a) + n.slice(a + 2);
+        break;
+      }
+    }
+  }
+  return '549' + n;
+}
+
 function bloqueAyuda(){
   const tel = SUCURSAL && SUCURSAL.telefono ? SUCURSAL.telefono : '';
   const solo = tel.replace(/\D/g, '');
+  const wa = waAr(tel);
   return '<div class="ayuda">' +
     '<h4>Cualquier cosa, avisanos</h4>' +
     '<p>Si querés <b>cambiar o agregar algo a este pedido</b>, o tenés una duda, un problema ' +
     'o un faltante, escribinos. Lo resolvemos en el momento.</p>' +
-    (solo
-      ? '<a href="https://wa.me/' + esc(solo) + '" target="_blank" rel="noopener">' +
+    (wa
+      ? '<a href="https://wa.me/' + esc(wa) + '" target="_blank" rel="noopener">' +
         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 01-11.9 7L4 20l1.1-4A8 8 0 1120 12z"/></svg>' +
         'Escribinos por WhatsApp</a>' +
         '<a class="tel" href="tel:' + esc(solo) + '">' + esc(tel) + '</a>'
-      : '<p style="opacity:.7;margin:0">Consultá en ' + esc((SUCURSAL || {}).nombre || 'tu sucursal') + '.</p>') +
+      : '<p style="opacity:.75;margin:0">Acercate a <b>' +
+        esc((SUCURSAL || {}).nombre || 'tu sucursal') + '</b>' +
+        ((SUCURSAL || {}).direccion ? ', ' + esc(SUCURSAL.direccion) : '') + '.</p>') +
     '</div>';
 }
 

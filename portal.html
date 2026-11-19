@@ -121,6 +121,15 @@ img{max-width:100%}
 .erow .lapiz{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
              color:var(--ink-2);flex-shrink:0}
 .erow .lapiz:active{background:#EFE9DC}
+/* flechas para acomodar el producto dentro de su grupo */
+.erow .mover{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.erow .mover button{width:28px;height:17px;border-radius:6px;display:grid;place-items:center;
+  color:var(--ink-2);background:#F2EDE1;font-size:10px;line-height:1}
+.erow .mover button:active{background:#E2DAC8;color:var(--navy)}
+.erow .mover button[disabled]{opacity:.28}
+.erow.moviendo{box-shadow:0 0 0 2px var(--navy);transition:box-shadow .15s}
+.subgrupo{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);
+  margin:10px 0 6px 6px;font-weight:600}
 .sw{width:44px;height:25px;border-radius:13px;background:#CBC5B6;position:relative;flex-shrink:0;
     transition:background .15s;border:none}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;
@@ -203,7 +212,7 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
     <button class="btn ghost" id="btnRefrescar" style="margin-top:20px" onclick="cargar(true)">Actualizar</button>
     <button class="btn ghost" id="btnCSV" onclick="bajarCSV()">Bajar a Excel</button>
     <p style="text-align:center;font-size:11.5px;color:var(--navy-300);margin:22px 0 10px">
-      Portal v1.7</p>
+      Portal v1.8</p>
   </div>
 </div>
 
@@ -537,7 +546,14 @@ function pintarCatalogo(){
   mods.forEach(m => {
     h += '<div class="grupo">' + esc(m.nombre) +
       '<button class="mini" data-nuevo="' + esc(m.id) + '">+ producto</button></div>';
-    CAT.filter(p => p.modulo_id === m.id).forEach(p => {
+    let grupoActual = null;
+    const delMod = CAT.filter(p => p.modulo_id === m.id);
+    const variosGrupos = delMod.some(p => (p.grupo || '') !== (delMod[0].grupo || ''));
+    delMod.forEach(p => {
+      if (variosGrupos && (p.grupo || '') !== grupoActual){
+        grupoActual = p.grupo || '';
+        h += '<div class="subgrupo">' + esc(grupoActual || 'Sin grupo') + '</div>';
+      }
       h += (editando === p.id) ? formProducto(p) : filaProducto(p);
     });
   });
@@ -546,8 +562,23 @@ function pintarCatalogo(){
   $('#cuerpo').innerHTML = h;
 }
 
+// Primero y último de su grupo: esos no se pueden mover más.
+function bordes(p){
+  const hermanos = (CAT || []).filter(x => x.modulo_id === p.modulo_id &&
+                                           (x.grupo || '') === (p.grupo || ''));
+  const i = hermanos.map(x => x.id).indexOf(p.id);
+  return { primero: i <= 0, ultimo: i === hermanos.length - 1 };
+}
+
 function filaProducto(p){
-  return '<div class="erow' + (p.activo ? '' : ' off') + '">' +
+  const b = bordes(p);
+  return '<div class="erow' + (p.activo ? '' : ' off') + '" id="fila-' + esc(p.id) + '">' +
+    '<div class="mover">' +
+      '<button data-sube="' + esc(p.id) + '" aria-label="Subir"' +
+        (b.primero ? ' disabled' : '') + '>▲</button>' +
+      '<button data-baja="' + esc(p.id) + '" aria-label="Bajar"' +
+        (b.ultimo ? ' disabled' : '') + '>▼</button>' +
+    '</div>' +
     '<button class="sw" role="switch" aria-checked="' + (p.activo ? 'true' : 'false') +
       '" data-tog="' + esc(p.id) + '" aria-label="Visible"></button>' +
     '<div class="nn"><b>' + esc(p.producto) + (p.destacado ? ' ★' : '') + '</b>' +
@@ -665,6 +696,36 @@ async function borrarProducto(id){
   if (r.error) return alert('No se pudo borrar: ' + r.error);
   editando = null;
   cargarCatalogo();
+}
+
+// El intercambio lo hace el servidor; acá se pinta primero para que no se sienta lento.
+let moviendo = false;
+async function moverProducto(id, dir){
+  if (moviendo) return;
+  const i = (CAT || []).map(x => x.id).indexOf(id);
+  if (i === -1) return;
+  const paso = dir === 'arriba' ? -1 : 1;
+  const j = i + paso;
+  if (j < 0 || j >= CAT.length) return;
+  if (CAT[j].modulo_id !== CAT[i].modulo_id) return;
+  if ((CAT[j].grupo || '') !== (CAT[i].grupo || '')) return;
+
+  moviendo = true;
+  CAT.splice(j, 0, CAT.splice(i, 1)[0]);
+  pintarCatalogo();
+  const fila = $('#fila-' + id);
+  if (fila){
+    fila.classList.add('moviendo');
+    fila.scrollIntoView({ block:'nearest' });
+    setTimeout(() => fila.classList.remove('moviendo'), 600);
+  }
+
+  const r = await mandar({ action:'moverProducto', id:id, dir:dir });
+  moviendo = false;
+  if (r.error){
+    alert('No se pudo mover: ' + r.error);
+    return cargarCatalogo();                 // vuelve a lo que dice la planilla
+  }
 }
 
 async function togProducto(id){
@@ -804,7 +865,8 @@ function copiar(txt, btn){
 // Un solo oyente para todo lo editable: evita armar onclick con comillas adentro.
 document.addEventListener('click', function(e){
   const b = e.target.closest('[data-edit],[data-tog],[data-nuevo],[data-cancel],[data-guardar],' +
-                             '[data-borrar],[data-check],[data-editb],[data-guardarb],[data-link],[data-comp]');
+                             '[data-borrar],[data-check],[data-editb],[data-guardarb],[data-link],' +
+                             '[data-comp],[data-sube],[data-baja]');
   if (!b) return;
   if (b.hasAttribute('data-edit')){ editando = b.getAttribute('data-edit'); return pintarCatalogo(); }
   if (b.hasAttribute('data-tog'))  return togProducto(b.getAttribute('data-tog'));
@@ -820,6 +882,8 @@ document.addEventListener('click', function(e){
   }
   if (b.hasAttribute('data-guardar'))  return guardarProducto(b.getAttribute('data-guardar'));
   if (b.hasAttribute('data-borrar'))   return borrarProducto(b.getAttribute('data-borrar'));
+  if (b.hasAttribute('data-sube'))     return moverProducto(b.getAttribute('data-sube'), 'arriba');
+  if (b.hasAttribute('data-baja'))     return moverProducto(b.getAttribute('data-baja'), 'abajo');
   if (b.hasAttribute('data-editb')){ editando = b.getAttribute('data-editb'); return pintarBarrios(); }
   if (b.hasAttribute('data-guardarb')) return guardarBarrio(b.getAttribute('data-guardarb'));
   if (b.hasAttribute('data-link'))     return copiar(b.getAttribute('data-link'), b);
