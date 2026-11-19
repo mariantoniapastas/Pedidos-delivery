@@ -121,6 +121,7 @@ input,select,textarea{font:inherit;color:inherit}
 .faltabox .k{font-size:11px;letter-spacing:1.4px;opacity:.85;font-weight:700}
 .faltabox .v{font-size:22px;font-weight:700;margin-top:4px}
 .faltabox .n{font-size:12.5px;opacity:.92;margin-top:6px;line-height:1.45}
+.faltabox.verde{background:var(--verde,#2F6B4F)}
 @media(prefers-reduced-motion:no-preference){
   .strip.cargando{animation:latir 1.1s ease-in-out infinite}
   @keyframes latir{0%,100%{opacity:.4}50%{opacity:.75}}
@@ -672,7 +673,7 @@ const modo = 'envio';   // esta app es solo entrega a domicilio
 const cliente = { nom:'', tel:'', obs:'' };
 
 /* ============ UTILIDADES ============ */
-const VERSION = 'v2.6';
+const VERSION = 'v2.7';
 const $ = s => document.querySelector(s);
 const money = n => '$' + Math.round(n).toLocaleString('es-AR');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -843,24 +844,36 @@ function pintarPedidoAbierto(){
       '<div class="os">' + esc(PEDIDO.items.length) + ' ' +
         (PEDIDO.items.length === 1 ? 'producto' : 'productos') + ' · ' + money(PEDIDO.total) +
         ' · N° ' + esc(PEDIDO.id) + '</div>' +
-      (PEDIDO.soloAgregar
+      (PEDIDO.incompleto
+        ? '<div class="olock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>' +
+          '<div>Este pedido tiene productos que ya no están en el catálogo, así que no lo podemos abrir acá. ' +
+          'Para cambiarlo, escribinos' + (SUCURSAL && SUCURSAL.telefono ? ' al <b>'+esc(SUCURSAL.telefono)+'</b>' : '') + '.</div></div>'
+        : '') +
+      (PEDIDO.soloAgregar && !PEDIDO.incompleto
         ? '<div class="olock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="flex-shrink:0;margin-top:1px"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 018 0v3.5"/></svg>' +
           '<div>Ya está pago por transferencia: <b>podés agregar productos, pero no sacar ni cambiar los que ya pediste</b>. La diferencia la abonás en la entrega.</div></div>'
         : '') +
-      '<div class="oact">' +
-        '<button class="pri" onclick="modificarPedido()">Modificar este pedido</button>' +
-      '</div>' +
+      (PEDIDO.incompleto ? '' :
+        '<div class="oact">' +
+          '<button class="pri" onclick="modificarPedido()">Modificar este pedido</button>' +
+        '</div>') +
     '</div></div>';
 }
 
 // Carga el pedido en el carrito y entra en modo edición.
 function modificarPedido(){
   if (!PEDIDO) return;
+  // Si no se puede recargar el pedido COMPLETO, no se modifica: guardarlo a medias
+  // le borraría al cliente lo que no se pudo leer.
+  if (PEDIDO.incompleto || PEDIDO.items.some(i => !find(i.clave))){
+    PEDIDO.incompleto = true;
+    pintarPedidoAbierto(); refrescar();
+    return;
+  }
   const min = {};
   Object.keys(cart).forEach(k => delete cart[k]);
   Object.keys(conserva).forEach(k => delete conserva[k]);
   PEDIDO.items.forEach(function(i){
-    if (!find(i.clave)) return;              // producto dado de baja: no se puede recargar
     cart[i.clave] = i.qty;
     if (i.conservacion === 'freezer') conserva[i.clave] = 'freezer';
     if (PEDIDO.soloAgregar) min[i.clave] = i.qty;
@@ -914,7 +927,8 @@ async function guardarCambios(){
     return;
   }
 
-  const falta = r.falta || 0, soloAgregar = EDIT.soloAgregar, pagado = EDIT.pagado || 0;
+  const falta = r.falta || 0, aFavor = r.aFavor || 0;
+  const soloAgregar = EDIT.soloAgregar, pagado = EDIT.pagado || 0;
   guardarUltimo();
   $('#doneId').textContent = r.id;
   $('#doneName').textContent = 'Listo, lo actualizamos.';
@@ -924,9 +938,15 @@ async function guardarCambios(){
     { weekday:'long', day:'numeric', month:'long' });
   $('#doneTot').textContent = money(r.total);
   $('#doneAviso').innerHTML = (soloAgregar
-    ? '<div class="faltabox"><div class="k">YA PAGASTE ' + money(pagado) + '</div>' +
-      '<div class="v">En la entrega abonás ' + money(falta) + '</div>' +
-      '<div class="n">Es la diferencia por lo que agregaste. Podés pagarla en efectivo al recibir el pedido.</div></div>'
+    ? '<div class="faltabox'+(falta ? '' : ' verde')+'"><div class="k">YA PAGASTE ' + money(pagado) + '</div>' +
+      (falta
+        ? '<div class="v">En la entrega abonás ' + money(falta) + '</div>' +
+          '<div class="n">Es la diferencia por lo que agregaste. Podés pagarla en efectivo al recibir el pedido.</div>'
+        : (aFavor
+            ? '<div class="v">Te devolvemos ' + money(aFavor) + '</div>' +
+              '<div class="n">Al agregar productos el envío te quedó sin cargo. Te lo devolvemos en la entrega.</div>'
+            : '<div class="v">No tenés nada más que pagar</div>')) +
+      '</div>'
     : '') + avisoEntrega();
   $('#doneComp').innerHTML = '';
   $('#doneAyuda').innerHTML = bloqueAyuda();
@@ -1025,7 +1045,7 @@ function dots(){
 
 function renderCats(){
   // Con un pedido abierto, lo que corresponde es modificarlo, no repetirlo.
-  if (PEDIDO && !EDIT){
+  if (PEDIDO && !EDIT && !PEDIDO.incompleto){
     const cuando = new Date(PEDIDO.entrega).toLocaleDateString('es-AR',
       { weekday:'long', day:'numeric', month:'long' });
     $('#lastord').innerHTML =
@@ -1257,6 +1277,10 @@ function renderCart(){
     if (EDIT.soloAgregar && dif > 0)
       h += '<div class="faltabox"><div class="k">YA PAGASTE ' + money(EDIT.pagado || 0) + '</div>' +
         '<div class="v">En la entrega abonás ' + money(dif) + '</div></div>';
+    else if (EDIT.soloAgregar && dif < 0)
+      h += '<div class="faltabox verde"><div class="k">YA PAGASTE ' + money(EDIT.pagado || 0) + '</div>' +
+        '<div class="v">Te devolvemos ' + money(-dif) + '</div>' +
+        '<div class="n">El envío te quedó sin cargo.</div></div>';
     h += '<button id="btnGuardar" class="btn terra" style="margin-top:18px" onclick="guardarCambios()"' +
       (bajoMin ? ' disabled' : '') + '>Guardar los cambios</button>';
     h += '<div id="editErr" class="pmsg bad" style="margin:12px 0 0;padding:0"></div>';

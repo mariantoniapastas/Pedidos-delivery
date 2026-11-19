@@ -143,6 +143,17 @@ una caja roja con lo que hay que cobrar. Además **llega un mail aparte**, con a
 
 El CSV de la sucursal trae dos columnas nuevas: `Modificado` y `Falta cobrar`.
 
+**El envío se recalcula sobre el pedido entero, no sobre lo que se agrega.** Si el cliente
+tenía $76.000 con envío cobrado y agrega lo que le faltaba para llegar al mínimo, el envío
+pasa a ser gratis y el total baja. Si con eso el pedido queda por debajo de lo que ya pagó,
+la app y el portal avisan cuánto hay que **devolverle** en la entrega.
+
+Un pedido solo se puede modificar si se lo puede volver a armar completo. Si tiene un producto
+que ya no está en el catálogo, la app no ofrece el botón y el backend rechaza la modificación:
+guardar lo nuevo le borraría al cliente la línea que no se pudo leer. Los pedidos anteriores a
+esta función no guardaban la clave de cada renglón; el backend la deduce del módulo y el nombre
+del producto, así que también se pueden modificar.
+
 ## El resumen de cierre
 
 Cuando a un barrio se le cierra el pedido, su sucursal recibe un mail con todo lo que hay que
@@ -160,4 +171,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.6` (app) y `v1.5` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.7` (app) y `v1.6` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
