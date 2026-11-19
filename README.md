@@ -115,44 +115,16 @@ habilitado. Ese es el tuyo: no hace falta repartirlo.
 
 Los pedidos nunca se mezclan: se filtran por sucursal **y** por fecha de entrega.
 
-## Modificar un pedido ya hecho
+## Cambios en un pedido ya hecho
 
-Hasta el **cierre de pedidos del barrio**, el cliente que vuelve a abrir la app ve una tarjeta
-roja —en la portada y también arriba del catálogo— con su pedido y un botón para modificarlo.
-La app reconoce el pedido por el número que guardó en el celular y, si no lo tiene (pedido
-hecho antes de esta versión, app reinstalada, celular nuevo), **por el teléfono del cliente
-dentro de su barrio**. Después del cierre la tarjeta
-desaparece sola: la producción ya está planificada con esos totales.
+**Los hace la sucursal, no el cliente.** La app no deja modificar un pedido confirmado: en la
+pantalla final y en el aviso de contacto se le dice al cliente que escriba o llame a la
+sucursal si quiere cambiar o agregar algo, con el teléfono de la columna `telefono` de
+`Sucursales`. La sucursal edita la planilla a mano.
 
-Hay dos casos, y los decide el backend, no la app:
-
-| Cómo pagó | Qué puede hacer |
-|---|---|
-| Efectivo, o transferencia **sin** comprobante adjunto | Cambiar todo: agregar, sacar, subir o bajar cantidades |
-| Transferencia **con** comprobante adjunto, o marcado "cobrado" | **Solo agregar.** No puede sacar renglones, bajar cantidades ni cambiar fresco/freezer de lo que ya pidió |
-
-En el segundo caso queda asentado cuánto pagó (columna `pagado`, se completa sola al adjuntar
-el comprobante o al marcarlo cobrado). La diferencia se cobra en la entrega y la app se lo
-avisa al cliente antes de guardar.
-
-**En el portal**, un pedido modificado aparece con borde rojo, chip `MODIFICADO` y, si falta
-cobrar, el chip `FALTA $X`. Arriba de la lista sale una alerta roja con cuántos se modificaron
-y cuánto suman las diferencias. Al abrir el detalle hay un aviso de que esa es la lista buena y
-una caja roja con lo que hay que cobrar. Además **llega un mail aparte**, con asunto
-`⚠️ MODIFICADO`, para que no se mezcle con el del pedido original.
-
-El CSV de la sucursal trae dos columnas nuevas: `Modificado` y `Falta cobrar`.
-
-**El envío se recalcula sobre el pedido entero, no sobre lo que se agrega.** Si el cliente
-tenía $76.000 con envío cobrado y agrega lo que le faltaba para llegar al mínimo, el envío
-pasa a ser gratis y el total baja. Si con eso el pedido queda por debajo de lo que ya pagó,
-la app y el portal avisan cuánto hay que **devolverle** en la entrega.
-
-Un pedido solo se puede modificar si se lo puede volver a armar completo. Si tiene un producto
-que ya no está en el catálogo, la app no ofrece el botón y el backend rechaza la modificación:
-guardar lo nuevo le borraría al cliente la línea que no se pudo leer. Los pedidos anteriores a
-esta función no guardaban la clave de cada renglón; el backend la deduce del módulo y el nombre
-del producto, así que también se pueden modificar.
+Se evaluó dejar que el cliente lo hiciera solo desde la app y se descartó: el pedido pago por
+transferencia obligaba a llevar la cuenta de lo ya cobrado contra el nuevo total, y cualquier
+error ahí cuesta un cliente. Un llamado es más barato.
 
 ## El resumen de cierre
 
@@ -171,4 +143,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.7` (app) y `v1.6` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.8` (app) y `v1.7` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.

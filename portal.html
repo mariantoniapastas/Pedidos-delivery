@@ -163,22 +163,6 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
 .vacio{text-align:center;padding:60px 20px;color:var(--ink-2);font-size:14px}
 .err{background:var(--terra-soft);color:#6B2418;border-radius:10px;padding:11px 14px;
      font-size:13px;margin-top:12px}
-/* pedidos modificados: tienen que saltar a la vista */
-.alertamod{background:#B4342A;color:#fff;border-radius:12px;padding:14px 16px;margin:0 0 16px;
-  display:flex;gap:11px;align-items:flex-start;box-shadow:0 6px 20px rgba(180,52,42,.28)}
-.alertamod svg{flex-shrink:0;margin-top:1px}
-.alertamod b{display:block;font-size:14.5px;margin-bottom:3px}
-.alertamod span{font-size:12.8px;opacity:.94;line-height:1.45}
-.ped.mod{border-color:#B4342A;box-shadow:0 0 0 2px rgba(180,52,42,.16)}
-.chip.mod{background:#B4342A;color:#fff;font-weight:700;letter-spacing:.4px}
-.avisomod{background:#FBE9E7;border-left:4px solid #B4342A;color:#8E2A22;border-radius:8px;
-  padding:11px 13px;margin:0 0 12px;font-size:12.8px;line-height:1.5}
-.avisomod b{font-weight:700}
-.difcobro{background:#B4342A;color:#fff;border-radius:10px;padding:12px 14px;margin:12px 0 0}
-.difcobro .k{font-size:10.5px;letter-spacing:1.3px;opacity:.85;font-weight:700}
-.difcobro .v{font-size:19px;font-weight:700;margin-top:3px}
-.difcobro .n{font-size:12px;opacity:.9;margin-top:5px;line-height:1.4}
-.difcobro.verde{background:#2F6B4F}
 @media(prefers-reduced-motion:no-preference){.ped{transition:opacity .2s}}
 </style>
 </head>
@@ -219,7 +203,7 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
     <button class="btn ghost" id="btnRefrescar" style="margin-top:20px" onclick="cargar(true)">Actualizar</button>
     <button class="btn ghost" id="btnCSV" onclick="bajarCSV()">Bajar a Excel</button>
     <p style="text-align:center;font-size:11.5px;color:var(--navy-300);margin:22px 0 10px">
-      Portal v1.6</p>
+      Portal v1.7</p>
   </div>
 </div>
 
@@ -357,12 +341,6 @@ const itemsDe = id => ITEMS.filter(i => String(i.pedido_id).trim() === String(id
 const esFrz = i => String(i.conservacion).trim() === 'freezer';
 const cobrado = p => String(p.cobrado).trim().toUpperCase() === 'SI';
 const estado = p => String(p.estado || 'pendiente').trim();
-const modificado = p => String(p.modificado || '').trim() !== '';
-// Lo que ya pagó por transferencia. Si después agregó, la diferencia se cobra en la entrega.
-const pagadoDe = p => Number(p.pagado) || 0;
-const difCobro = p => pagadoDe(p) > 0 ? Math.max(0, (Number(p.total) || 0) - pagadoDe(p)) : 0;
-// Si al agregar el envío pasó a ser gratis, el pedido quedó por debajo de lo pagado.
-const aFavorDe = p => pagadoDe(p) > 0 ? Math.max(0, pagadoDe(p) - (Number(p.total) || 0)) : 0;
 
 /* ============ PINTAR ============ */
 function pintar(){
@@ -406,22 +384,7 @@ function pintarPedidos(){
   const faltaCobrar = ps.filter(p => !cobrado(p));
   const entregados = ps.filter(p => estado(p) === 'entregado');
 
-  const mods = ps.filter(modificado);
-  const dif = ps.reduce((t,p) => t + difCobro(p), 0);
-  const fav = ps.reduce((t,p) => t + aFavorDe(p), 0);
-
   let h = '';
-  if (mods.length){
-    h += '<div class="alertamod">' +
-      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v5M12 17h.01"/><path d="M10.3 3.9L1.8 18.4a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>' +
-      '<div><b>' + mods.length + (mods.length === 1
-        ? ' pedido fue modificado por el cliente'
-        : ' pedidos fueron modificados por el cliente') + '</b>' +
-      '<span>Están marcados en rojo más abajo. Mirá la lista nueva antes de producir y descartá lo que hayas anotado antes.' +
-      (dif ? ' Hay ' + money(dif) + ' de diferencias para cobrar en la entrega.' : '') +
-      (fav ? ' Hay ' + money(fav) + ' para devolver.' : '') +
-      '</span></div></div>';
-  }
 
   h += '<div class="kpis">' +
     '<div class="kpi"><div class="k">Pedidos</div><div class="v">'+ps.length+'</div></div>' +
@@ -432,18 +395,13 @@ function pintarPedidos(){
       ? '<div class="kpi alerta"><div class="k">Falta cobrar</div><div class="v">' +
         money(faltaCobrar.reduce((s,p) => s + (Number(p.total) || 0), 0)) + '</div></div>'
       : '') +
-    (dif
-      ? '<div class="kpi alerta"><div class="k">Diferencias a cobrar</div><div class="v">' +
-        money(dif) + '</div></div>'
-      : '') +
     '</div>';
 
   h += ps.map(p => {
     const id = String(p.id).trim(), its = itemsDe(id), ab = abierto[id];
     const est = estado(p), cob = cobrado(p);
     const frz = its.some(esFrz);
-    return '<div class="ped'+(est === 'entregado' && cob ? ' lista' : '')+
-                             (modificado(p) ? ' mod' : '')+'">' +
+    return '<div class="ped'+(est === 'entregado' && cob ? ' lista' : '')+'">' +
       '<button class="cab" onclick="abrir(\''+jsq(id)+'\')">' +
         '<div class="top">' +
           '<div class="quien">' +
@@ -454,9 +412,6 @@ function pintarPedidos(){
           '<div class="der"><div class="tot">'+money(p.total)+'</div></div>' +
         '</div>' +
           '<div class="chips">' +
-            (modificado(p) ? '<span class="chip mod">MODIFICADO</span>' : '') +
-            (difCobro(p) ? '<span class="chip rojo">Falta '+money(difCobro(p))+'</span>' : '') +
-            (aFavorDe(p) ? '<span class="chip verde">Devolver '+money(aFavorDe(p))+'</span>' : '') +
             (frz ? '<span class="chip frio">Freezer</span>' : '') +
             '<span class="chip '+(est === 'entregado' ? 'verde' : 'gris')+'">'+esc(est)+'</span>' +
             (cob ? '<span class="chip verde">Cobrado</span>'
@@ -480,28 +435,11 @@ function detalle(p, its, est, cob){
   const frescos = its.filter(i => !esFrz(i)), frz = its.filter(esFrz);
 
   return '<div class="detalle">' +
-    (modificado(p)
-      ? '<div class="avisomod"><b>⚠ El cliente modificó este pedido.</b> ' +
-        'Esta de abajo es la lista buena — descartá cualquier versión anterior que hayas impreso o anotado.' +
-        (pagadoDe(p) ? ' Ya pagó ' + money(pagadoDe(p)) + ' por transferencia.' : '') +
-        '</div>'
-      : '') +
     (frz.length && frescos.length ? '<div class="subt">Fresco</div>' : '') +
     frescos.map(linea).join('') +
     (frz.length ? '<div class="subt frz">Para freezar — bolsas chicas / film</div>' : '') +
     frz.map(linea).join('') +
     (p.comentarios ? '<div class="nota">'+esc(p.comentarios)+'</div>' : '') +
-    (difCobro(p)
-      ? '<div class="difcobro"><div class="k">YA PAGÓ ' + money(pagadoDe(p)) +
-        ' POR TRANSFERENCIA</div>' +
-        '<div class="v">Cobrar en la entrega: ' + money(difCobro(p)) + '</div></div>'
-      : '') +
-    (aFavorDe(p)
-      ? '<div class="difcobro verde"><div class="k">YA PAGÓ ' + money(pagadoDe(p)) +
-        ' POR TRANSFERENCIA</div>' +
-        '<div class="v">Devolverle: ' + money(aFavorDe(p)) + '</div>' +
-        '<div class="n">Al agregar productos el envío le quedó sin cargo.</div></div>'
-      : '') +
     (String(p.comprobante || '').trim()
       ? '<button class="vercomp" data-comp="' + esc(String(p.id).trim()) + '">' +
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3.5L8 5.5h8L17.5 8H21v12H3z"/><circle cx="12" cy="13.5" r="3.6"/></svg>' +
