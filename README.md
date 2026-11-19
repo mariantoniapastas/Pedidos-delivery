@@ -118,7 +118,10 @@ Los pedidos nunca se mezclan: se filtran por sucursal **y** por fecha de entrega
 ## Modificar un pedido ya hecho
 
 Hasta el **cierre de pedidos del barrio**, el cliente que vuelve a abrir la app ve una tarjeta
-roja en la portada con su pedido y un botón para modificarlo. Después del cierre la tarjeta
+roja —en la portada y también arriba del catálogo— con su pedido y un botón para modificarlo.
+La app reconoce el pedido por el número que guardó en el celular y, si no lo tiene (pedido
+hecho antes de esta versión, app reinstalada, celular nuevo), **por el teléfono del cliente
+dentro de su barrio**. Después del cierre la tarjeta
 desaparece sola: la producción ya está planificada con esos totales.
 
 Hay dos casos, y los decide el backend, no la app:
@@ -157,4 +160,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.5` (app) y `v1.5` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.6` (app) y `v1.5` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
