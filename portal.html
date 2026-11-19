@@ -103,6 +103,45 @@ img{max-width:100%}
        color:var(--navy-600);margin:20px 0 9px;font-weight:500}
 .grupo:first-child{margin-top:0}
 
+/* edición */
+.erow{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);
+      border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.erow.off{opacity:.5}
+.erow .nn{flex:1;min-width:0;text-align:left}
+.erow .nn b{display:block;font-size:14.5px;font-weight:600;line-height:1.3}
+.erow .nn small{display:block;color:var(--ink-2);font-size:11.5px;margin-top:2px}
+.erow .pp{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.erow .lapiz{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+             color:var(--ink-2);flex-shrink:0}
+.erow .lapiz:active{background:#EFE9DC}
+.sw{width:44px;height:25px;border-radius:13px;background:#CBC5B6;position:relative;flex-shrink:0;
+    transition:background .15s;border:none}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;
+           background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw[aria-checked="true"]{background:var(--verde)}
+.sw[aria-checked="true"]::after{transform:translateX(19px)}
+.form{background:var(--paper);border:1px solid var(--navy-300);border-radius:12px;
+      padding:16px;margin-bottom:10px;box-shadow:0 3px 14px rgba(21,51,80,.1)}
+.ff{margin-bottom:12px}
+.ff label{display:block;font-size:11.5px;letter-spacing:.05em;color:var(--ink-2);margin-bottom:5px}
+.ff input,.ff select,.ff textarea{width:100%;background:var(--cream);border:1px solid var(--line);
+     border-radius:9px;padding:10px 12px;font-size:14.5px;outline:none;text-align:left;letter-spacing:0}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--navy-600);
+     box-shadow:0 0 0 3px rgba(39,86,122,.13)}
+.ff .pista{font-size:11.5px;color:var(--navy-300);margin-top:4px;line-height:1.4}
+.fgrid{display:flex;gap:10px}
+.fgrid .ff{flex:1}
+.fcheck{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:14px}
+.fbtns{display:flex;gap:8px;margin-top:4px}
+.fbtns button{flex:1;border-radius:10px;padding:12px;font-size:12.5px;font-weight:700;letter-spacing:.05em}
+.fbtns .guardar{background:var(--navy);color:var(--paper)}
+.fbtns .cancelar{background:transparent;border:1px solid var(--line);color:var(--ink-2)}
+.fbtns .borrar{flex:0 0 46px;background:var(--terra-soft);color:var(--terra)}
+.addbtn{width:100%;border:1px dashed var(--navy-300);border-radius:11px;padding:12px;
+        font-size:13px;color:var(--navy-600);margin-bottom:14px;background:transparent}
+.grupo .mini{float:right;font-family:var(--b);font-size:11.5px;letter-spacing:0;
+             text-transform:none;color:var(--terra);font-weight:500}
+
 .login{max-width:380px;margin:12vh auto;padding:0 20px;text-align:center}
 .login .wm{font-family:var(--d);font-size:30px;letter-spacing:.18em;text-indent:.18em;font-weight:400}
 .login p{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:18px 0}
@@ -140,13 +179,15 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
     <div class="tabs">
       <button id="tPed" class="on" onclick="verTab('pedidos')">Pedidos</button>
       <button id="tProd" onclick="verTab('produccion')">Producción</button>
+      <button id="tCat" onclick="verTab('catalogo')">Catálogo</button>
+      <button id="tBar" onclick="verTab('barrios')">Barrios</button>
     </div>
     <div class="fechas" id="fechas"></div>
     <div id="cuerpo"></div>
-    <button class="btn ghost" style="margin-top:20px" onclick="cargar(true)">Actualizar</button>
-    <button class="btn ghost" onclick="bajarCSV()">Bajar a Excel</button>
+    <button class="btn ghost" id="btnRefrescar" style="margin-top:20px" onclick="cargar(true)">Actualizar</button>
+    <button class="btn ghost" id="btnCSV" onclick="bajarCSV()">Bajar a Excel</button>
     <p style="text-align:center;font-size:11.5px;color:var(--navy-300);margin:22px 0 10px">
-      Portal v1.0</p>
+      Portal v1.1</p>
   </div>
 </div>
 
@@ -161,6 +202,7 @@ const jsq = s => esc(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
 let TOKEN = '', SUCS = [], suc = '', tab = 'pedidos';
 let PEDIDOS = [], ITEMS = [], fechaSel = null, abierto = {};
+let CAT = null, BARRIOS = null, editando = null;   // editando: id de producto, 'nuevo', o slug
 
 const tok = () => { try { return localStorage.getItem('ma_portal') || ''; } catch(e){ return ''; } };
 
@@ -205,7 +247,9 @@ function arrancarApp(){
 function cambiarSuc(){
   suc = $('#selSuc').value;
   try { localStorage.setItem('ma_portal_suc', suc); } catch(e){}
-  fechaSel = null;
+  fechaSel = null; CAT = null; editando = null;
+  if (tab === 'catalogo') return cargarCatalogo();
+  if (tab === 'barrios')  return pintarBarrios();
   cargar();
 }
 
@@ -255,6 +299,8 @@ const estado = p => String(p.estado || 'pendiente').trim();
 
 /* ============ PINTAR ============ */
 function pintar(){
+  if (tab === 'catalogo') return pintarCatalogo();
+  if (tab === 'barrios')  return pintarBarrios();
   const fs = fechas();
   if (!fechaSel || !fs.some(f => f.k === fechaSel)) fechaSel = fs.length ? fs[0].k : null;
 
@@ -276,8 +322,15 @@ function pintar(){
 const verFecha = f => { fechaSel = f; pintar(); };
 function verTab(t){
   tab = t;
-  $('#tPed').classList.toggle('on', t === 'pedidos');
-  $('#tProd').classList.toggle('on', t === 'produccion');
+  editando = null;
+  [['tPed','pedidos'],['tProd','produccion'],['tCat','catalogo'],['tBar','barrios']]
+    .forEach(function(x){ $('#'+x[0]).classList.toggle('on', t === x[1]); });
+  const dePedidos = (t === 'pedidos' || t === 'produccion');
+  $('#fechas').hidden = !dePedidos;
+  $('#btnCSV').hidden = !dePedidos;
+  $('#btnRefrescar').hidden = !dePedidos;
+  if (t === 'catalogo') return cargarCatalogo();
+  if (t === 'barrios')  return cargarBarrios();
   pintar();
 }
 
@@ -384,6 +437,329 @@ function pintarProduccion(){
 }
 
 const abrir = id => { abierto[id] = !abierto[id]; pintar(); };
+
+/* ============ CATÁLOGO ============ */
+const CONS = [['preparar','Fresco, se prepara para freezar'],
+              ['apto','Fresco, ya viene apto para freezar'],
+              ['congelado','Ya viene congelado'],
+              ['no','No se freeza']];
+
+const sucId = () => (SUCS.filter(x => x.nombre === suc)[0] || {}).id || '';
+
+async function cargarCatalogo(){
+  $('#cuerpo').innerHTML = '<div class="vacio">Cargando catálogo…</div>';
+  try {
+    const r = await fetch(BACKEND + '?action=catalogo&token=' + encodeURIComponent(TOKEN) +
+                          '&suc=' + encodeURIComponent(sucId()), { redirect:'follow' });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    CAT = d;
+    pintarCatalogo();
+  } catch(e){
+    $('#cuerpo').innerHTML = '<div class="err">No se pudo traer el catálogo: ' + esc(e.message) + '</div>';
+  }
+}
+
+function pintarCatalogo(){
+  if (!CAT) return cargarCatalogo();
+  const act = CAT.filter(p => p.activo).length;
+
+  let h = '<div class="kpis">' +
+    '<div class="kpi"><div class="k">Productos</div><div class="v">' + CAT.length + '</div></div>' +
+    '<div class="kpi"><div class="k">Visibles</div><div class="v">' + act + '</div></div>' +
+    (CAT.length - act
+      ? '<div class="kpi alerta"><div class="k">Ocultos</div><div class="v">' + (CAT.length - act) + '</div></div>'
+      : '') + '</div>';
+
+  if (editando === 'nuevo') h += formProducto(null);
+
+  const mods = [];
+  CAT.forEach(p => { if (!mods.some(m => m.id === p.modulo_id))
+    mods.push({ id:p.modulo_id, nombre:p.modulo }); });
+
+  mods.forEach(m => {
+    h += '<div class="grupo">' + esc(m.nombre) +
+      '<button class="mini" data-nuevo="' + esc(m.id) + '">+ producto</button></div>';
+    CAT.filter(p => p.modulo_id === m.id).forEach(p => {
+      h += (editando === p.id) ? formProducto(p) : filaProducto(p);
+    });
+  });
+
+  h += '<button class="addbtn" data-nuevo="">+ Agregar producto en un módulo nuevo</button>';
+  $('#cuerpo').innerHTML = h;
+}
+
+function filaProducto(p){
+  return '<div class="erow' + (p.activo ? '' : ' off') + '">' +
+    '<button class="sw" role="switch" aria-checked="' + (p.activo ? 'true' : 'false') +
+      '" data-tog="' + esc(p.id) + '" aria-label="Visible"></button>' +
+    '<div class="nn"><b>' + esc(p.producto) + (p.destacado ? ' ★' : '') + '</b>' +
+      (p.unidad || p.formatos ? '<small>' + esc(p.formatos || p.unidad) + '</small>' : '') + '</div>' +
+    '<div class="pp">' + money(p.precio) + '</div>' +
+    '<button class="lapiz" data-edit="' + esc(p.id) + '" aria-label="Editar">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>' +
+    '</button></div>';
+}
+
+function formProducto(p){
+  const v = p || { producto:'', unidad:'', precio:'', formatos:'', conservacion:'preparar',
+                   destacado:false, descripcion:'', foto_url:'', activo:true,
+                   modulo_id:editandoMod || '', modulo:'', modulo_desc:'', grupo:'' };
+  const mods = [];
+  (CAT || []).forEach(x => { if (!mods.some(m => m.id === x.modulo_id))
+    mods.push({ id:x.modulo_id, nombre:x.modulo, desc:x.modulo_desc }); });
+  const grupos = [];
+  (CAT || []).forEach(x => { if (x.modulo_id === v.modulo_id && grupos.indexOf(x.grupo) === -1)
+    grupos.push(x.grupo); });
+
+  return '<div class="form">' +
+    '<div class="ff"><label>Nombre</label>' +
+      '<input id="e-producto" value="' + esc(v.producto) + '" placeholder="Ravioles de ricotta"></div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Precio</label>' +
+        '<input id="e-precio" type="number" inputmode="numeric" value="' + (v.precio || '') + '"></div>' +
+      '<div class="ff"><label>Unidad</label>' +
+        '<input id="e-unidad" value="' + esc(v.unidad) + '" placeholder="Caja de 1 kg"></div>' +
+    '</div>' +
+    '<div class="ff"><label>Formatos</label>' +
+      '<input id="e-formatos" value="' + esc(v.formatos) + '" placeholder="500 g=3500; 1 kg=5800">' +
+      '<div class="pista">Vacío = un solo formato, usa el precio y la unidad de arriba. ' +
+        'Con formatos, el cliente elige y cada uno es una línea distinta del pedido.</div></div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Módulo</label><select id="e-modulo">' +
+        mods.map(m => '<option value="' + esc(m.id) + '"' +
+          (m.id === v.modulo_id ? ' selected' : '') + '>' + esc(m.nombre) + '</option>').join('') +
+        '<option value="__nuevo"' + (v.modulo_id ? '' : ' selected') + '>— módulo nuevo —</option>' +
+      '</select></div>' +
+      '<div class="ff"><label>Grupo</label>' +
+        '<input id="e-grupo" value="' + esc(v.grupo) + '" list="lgrupos" placeholder="Tradicionales">' +
+        '<datalist id="lgrupos">' + grupos.map(g => '<option value="' + esc(g) + '">').join('') +
+        '</datalist></div>' +
+    '</div>' +
+    '<div class="ff" id="w-modnuevo"' + (v.modulo_id ? ' hidden' : '') + '>' +
+      '<label>Nombre del módulo nuevo</label>' +
+      '<input id="e-modnom" value="' + esc(v.modulo) + '" placeholder="Postres">' +
+      '<div class="pista">Se crea al guardar. El orden en la app sigue el orden de la planilla.</div></div>' +
+    '<div class="ff"><label>Conservación</label><select id="e-cons">' +
+      CONS.map(c => '<option value="' + c[0] + '"' +
+        (c[0] === v.conservacion ? ' selected' : '') + '>' + c[1] + '</option>').join('') +
+    '</select></div>' +
+    '<div class="ff"><label>Descripción</label>' +
+      '<textarea id="e-desc" rows="2">' + esc(v.descripcion) + '</textarea></div>' +
+    '<div class="ff"><label>Foto (URL)</label>' +
+      '<input id="e-foto" value="' + esc(v.foto_url) + '" placeholder="https://..."></div>' +
+    '<div class="fcheck"><button class="sw" role="switch" id="e-destacado" ' +
+      'aria-checked="' + (v.destacado ? 'true' : 'false') + '" data-check></button> Destacado (Más elegido)</div>' +
+    '<div class="fcheck"><button class="sw" role="switch" id="e-activo" ' +
+      'aria-checked="' + (v.activo ? 'true' : 'false') + '" data-check></button> Visible en la app</div>' +
+    '<div class="fbtns">' +
+      '<button class="cancelar" data-cancel>Cancelar</button>' +
+      (p ? '<button class="borrar" data-borrar="' + esc(p.id) + '" aria-label="Borrar">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></svg></button>' : '') +
+      '<button class="guardar" data-guardar="' + (p ? esc(p.id) : '') + '">Guardar</button>' +
+    '</div></div>';
+}
+
+let editandoMod = '';
+
+function datosForm(){
+  const modSel = $('#e-modulo').value;
+  const nuevo = modSel === '__nuevo';
+  const nom = nuevo ? $('#e-modnom').value.trim() : '';
+  if (nuevo && !nom) { alert('Poné el nombre del módulo nuevo.'); return null; }
+  const prod = $('#e-producto').value.trim();
+  if (!prod) { alert('Poné el nombre del producto.'); return null; }
+
+  const ref = nuevo ? null : (CAT || []).filter(x => x.modulo_id === modSel)[0];
+  return {
+    producto: prod,
+    precio: Number($('#e-precio').value) || 0,
+    unidad: $('#e-unidad').value.trim(),
+    formatos: $('#e-formatos').value.trim(),
+    modulo_id: nuevo ? slugificar(nom) : modSel,
+    modulo: nuevo ? nom : (ref ? ref.modulo : ''),
+    modulo_desc: ref ? ref.modulo_desc : '',
+    grupo: $('#e-grupo').value.trim() || 'Productos',
+    conservacion: $('#e-cons').value,
+    descripcion: $('#e-desc').value.trim(),
+    foto_url: $('#e-foto').value.trim(),
+    destacado: $('#e-destacado').getAttribute('aria-checked') === 'true',
+    activo: $('#e-activo').getAttribute('aria-checked') === 'true',
+  };
+}
+
+const slugificar = t => String(t).toLowerCase().normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '').slice(0, 8) || 'mod';
+
+async function guardarProducto(id){
+  const campos = datosForm();
+  if (!campos) return;
+  const r = await mandar({ action:'producto', id:id || '', sucursal:sucId(), campos:campos });
+  if (r.error) return alert('No se pudo guardar: ' + r.error);
+  editando = null; editandoMod = '';
+  cargarCatalogo();
+}
+
+async function borrarProducto(id){
+  const p = (CAT || []).filter(x => x.id === id)[0];
+  if (!confirm('¿Sacar "' + (p ? p.producto : '') + '" del catálogo?\n\n' +
+               'Los pedidos viejos no se tocan. Si solo te falta stock, usá el interruptor.')) return;
+  const r = await mandar({ action:'borrarProducto', id:id });
+  if (r.error) return alert('No se pudo borrar: ' + r.error);
+  editando = null;
+  cargarCatalogo();
+}
+
+async function togProducto(id){
+  const p = (CAT || []).filter(x => x.id === id)[0];
+  if (!p) return;
+  p.activo = !p.activo;                       // se ve el cambio antes de la respuesta
+  pintarCatalogo();
+  const r = await mandar({ action:'producto', id:id, sucursal:sucId(),
+                           campos:{ producto:p.producto, activo:p.activo } });
+  if (r.error){ alert('No se pudo guardar: ' + r.error); cargarCatalogo(); }
+}
+
+/* ============ BARRIOS ============ */
+const DIAS = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+
+async function cargarBarrios(){
+  $('#cuerpo').innerHTML = '<div class="vacio">Cargando barrios…</div>';
+  try {
+    const r = await fetch(BACKEND + '?action=barriosAdmin&token=' + encodeURIComponent(TOKEN),
+                          { redirect:'follow' });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    BARRIOS = d;
+    pintarBarrios();
+  } catch(e){
+    $('#cuerpo').innerHTML = '<div class="err">No se pudieron traer los barrios: ' + esc(e.message) + '</div>';
+  }
+}
+
+function pintarBarrios(){
+  if (!BARRIOS) return cargarBarrios();
+  const mios = BARRIOS.filter(b => b.sucursal_id === sucId());
+  let h = '<div class="grupo">Barrios de ' + esc(suc) + '</div>';
+  if (!mios.length) h += '<div class="vacio">Esta sucursal no tiene barrios cargados.</div>';
+  mios.forEach(b => {
+    h += (editando === b.slug) ? formBarrio(b) : filaBarrio(b);
+  });
+  $('#cuerpo').innerHTML = h;
+}
+
+function filaBarrio(b){
+  const link = location.origin + location.pathname.replace(/portal\.html$/, '') + '?b=' + b.slug;
+  return '<div class="erow' + (b.activo ? '' : ' off') + '">' +
+    '<div class="nn"><b>' + esc(b.nombre) + '</b>' +
+      '<small>Entrega ' + esc(b.dia_entrega) + ' ' + esc(b.hora_entrega) +
+      ' · cierra ' + esc(b.dia_cierre) + ' ' + b.hora_cierre + ' h</small></div>' +
+    '<button class="lapiz" data-link="' + esc(link) + '" aria-label="Copiar link">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg></button>' +
+    '<button class="lapiz" data-editb="' + esc(b.slug) + '" aria-label="Editar">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>' +
+    '</button></div>';
+}
+
+function formBarrio(b){
+  const sel = (id, val) => '<select id="' + id + '">' + DIAS.map(d =>
+    '<option value="' + d + '"' + (d === val ? ' selected' : '') + '>' + d + '</option>').join('') + '</select>';
+  return '<div class="form">' +
+    '<div class="ff"><label>Nombre</label><input id="b-nombre" value="' + esc(b.nombre) + '"></div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Día de entrega</label>' + sel('b-diaent', b.dia_entrega) + '</div>' +
+      '<div class="ff"><label>Horario</label>' +
+        '<input id="b-horaent" value="' + esc(b.hora_entrega) + '" placeholder="18 a 21 h"></div>' +
+    '</div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Cierra el</label>' + sel('b-diacie', b.dia_cierre) + '</div>' +
+      '<div class="ff"><label>A las (0 a 23)</label>' +
+        '<input id="b-horacie" type="number" min="0" max="23" value="' + b.hora_cierre + '"></div>' +
+    '</div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Envío</label>' +
+        '<input id="b-envio" type="number" value="' + b.envio_costo + '"></div>' +
+      '<div class="ff"><label>Mínimo</label>' +
+        '<input id="b-min" type="number" value="' + b.envio_min + '"></div>' +
+    '</div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Envío gratis desde</label>' +
+        '<input id="b-gratis" type="number" value="' + b.envio_gratis_desde + '"></div>' +
+      '<div class="ff"><label>Descuento efectivo (%)</label>' +
+        '<input id="b-desc" type="number" value="' + Math.round(b.desc_efectivo * 100) + '"></div>' +
+    '</div>' +
+    '<div class="fgrid">' +
+      '<div class="ff"><label>Alias</label><input id="b-alias" value="' + esc(b.alias) + '"></div>' +
+      '<div class="ff"><label>Titular</label><input id="b-titular" value="' + esc(b.titular) + '"></div>' +
+    '</div>' +
+    '<div class="fcheck"><button class="sw" role="switch" id="b-activo" ' +
+      'aria-checked="' + (b.activo ? 'true' : 'false') + '" data-check></button> Toma pedidos</div>' +
+    '<div class="fbtns">' +
+      '<button class="cancelar" data-cancel>Cancelar</button>' +
+      '<button class="guardar" data-guardarb="' + esc(b.slug) + '">Guardar</button>' +
+    '</div></div>';
+}
+
+async function guardarBarrio(slug){
+  const campos = {
+    nombre: $('#b-nombre').value.trim(),
+    dia_entrega: $('#b-diaent').value, hora_entrega: $('#b-horaent').value.trim(),
+    dia_cierre: $('#b-diacie').value, hora_cierre: Number($('#b-horacie').value) || 0,
+    envio_costo: Number($('#b-envio').value) || 0,
+    envio_min: Number($('#b-min').value) || 0,
+    envio_gratis_desde: Number($('#b-gratis').value) || 0,
+    desc_efectivo: (Number($('#b-desc').value) || 0) / 100,
+    alias: $('#b-alias').value.trim(), titular: $('#b-titular').value.trim(),
+    activo: $('#b-activo').getAttribute('aria-checked') === 'true',
+  };
+  if (!campos.nombre) return alert('Poné el nombre del barrio.');
+  const r = await mandar({ action:'barrio', slug:slug, campos:campos });
+  if (r.error) return alert('No se pudo guardar: ' + r.error);
+  editando = null;
+  cargarBarrios();
+}
+
+function copiar(txt, btn){
+  const ok = () => { btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2F8F5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 7"/></svg>'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok).catch(()=>{});
+  else { const i = document.createElement('textarea'); i.value = txt; document.body.appendChild(i);
+         i.select(); try { document.execCommand('copy'); ok(); } catch(e){} i.remove(); }
+}
+
+// Un solo oyente para todo lo editable: evita armar onclick con comillas adentro.
+document.addEventListener('click', function(e){
+  const b = e.target.closest('[data-edit],[data-tog],[data-nuevo],[data-cancel],[data-guardar],' +
+                             '[data-borrar],[data-check],[data-editb],[data-guardarb],[data-link]');
+  if (!b) return;
+  if (b.hasAttribute('data-edit')){ editando = b.getAttribute('data-edit'); return pintarCatalogo(); }
+  if (b.hasAttribute('data-tog'))  return togProducto(b.getAttribute('data-tog'));
+  if (b.hasAttribute('data-nuevo')){
+    editandoMod = b.getAttribute('data-nuevo'); editando = 'nuevo';
+    pintarCatalogo();
+    const el = $('#e-producto'); if (el) el.focus();
+    return;
+  }
+  if (b.hasAttribute('data-cancel')){
+    editando = null; editandoMod = '';
+    return tab === 'barrios' ? pintarBarrios() : pintarCatalogo();
+  }
+  if (b.hasAttribute('data-guardar'))  return guardarProducto(b.getAttribute('data-guardar'));
+  if (b.hasAttribute('data-borrar'))   return borrarProducto(b.getAttribute('data-borrar'));
+  if (b.hasAttribute('data-editb')){ editando = b.getAttribute('data-editb'); return pintarBarrios(); }
+  if (b.hasAttribute('data-guardarb')) return guardarBarrio(b.getAttribute('data-guardarb'));
+  if (b.hasAttribute('data-link'))     return copiar(b.getAttribute('data-link'), b);
+  if (b.hasAttribute('data-check')){
+    b.setAttribute('aria-checked', b.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+  }
+});
+
+// Mostrar el campo de módulo nuevo solo cuando corresponde.
+document.addEventListener('change', function(e){
+  if (e.target && e.target.id === 'e-modulo'){
+    const w = $('#w-modnuevo');
+    if (w) w.hidden = e.target.value !== '__nuevo';
+  }
+});
 
 /* ============ ACCIONES ============ */
 async function mandar(cuerpo){

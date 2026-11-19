@@ -52,7 +52,8 @@ viaja dentro del código, así que el repositorio puede ser público.
 Sirve para **dar de baja productos sin stock**. Se tocan los interruptores, se toca Publicar,
 y todos los barrios de esa sucursal lo ven al instante.
 
-Para cambiar **precios, nombres, fotos o agregar productos**: la planilla.
+Para cambiar **precios, nombres, fotos o agregar productos**: la pestaña Catálogo del portal,
+o la planilla. Las dos escriben en el mismo lugar.
 
 ## Qué pasa cuando alguien pide
 
@@ -95,6 +96,13 @@ navegador. Pensado para la compu o la tablet del mostrador.
   y **Marcar cobrado**.
 - **Producción**: el consolidado de esa fecha, sumado por producto, con el freezer marcado.
   Es la hoja de armado.
+- **Catálogo**: el catálogo de esa sucursal, editable. Interruptor para ocultar lo que no hay,
+  lápiz para cambiar precio, nombre, unidad, formatos, conservación, descripción y foto.
+  Se agregan productos y módulos nuevos desde acá. Cada sucursal edita el suyo y no toca
+  el de las otras.
+- **Barrios**: los barrios de esa sucursal. Día y hora de entrega, día y hora de cierre,
+  envío, mínimo, envío gratis, descuento por efectivo y alias. Más el botón para copiar
+  el link del barrio.
 - Arriba a la derecha se ve cuánto falta cobrar, que son los de efectivo sin marcar.
 - **Bajar a Excel** descarga el CSV de esa sucursal.
 
@@ -115,4 +123,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.0` — aparece al pie del panel. Conviene mencionarla al reportar un problema.
+`v2.0` (app) y `v1.1` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.

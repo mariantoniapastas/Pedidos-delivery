@@ -1,6 +1,6 @@
 // Service worker de Mariantonia.
 // SUBIR LA VERSIÓN EN CADA DEPLOY: si no, los celulares siguen viendo la app vieja.
-const CACHE = 'mariantonia-v4';
+const CACHE = 'mariantonia-v5';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
