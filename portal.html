@@ -31,6 +31,7 @@ img{max-width:100%}
 .bar select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
             color:var(--paper);border-radius:9px;padding:8px 11px;font-size:13px;margin-left:auto}
 .bar select option{color:#000}
+.bar select:disabled{opacity:1;appearance:none;background:rgba(255,255,255,.07);border-style:dashed;padding-right:11px}
 .bar .out{font-size:11.5px;opacity:.6;letter-spacing:.06em;text-transform:uppercase}
 
 .wrap{max-width:860px;margin:0 auto;padding:18px}
@@ -162,10 +163,16 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
 
 <div id="login" class="login">
   <div class="wm">MARIANTONIA</div>
-  <p>Portal de sucursal.<br>Escribí la clave del sistema.</p>
-  <input id="clave" type="password" placeholder="Clave" onkeydown="if(event.key==='Enter')entrar()">
+  <p>Portal de sucursal</p>
+  <div class="ff" style="text-align:left"><label>Sucursal</label>
+    <select id="loginSuc"></select></div>
+  <div class="ff" style="text-align:left"><label>PIN</label>
+    <input id="clave" type="password" inputmode="numeric" placeholder="PIN"
+           onkeydown="if(event.key==='Enter')entrar()"></div>
   <button class="btn" onclick="entrar()">Entrar</button>
   <div id="loginErr" class="err" hidden></div>
+  <p style="font-size:11.5px;color:var(--navy-300);margin-top:22px">
+    Cada sucursal tiene su PIN y ve solamente sus pedidos y su catálogo.</p>
 </div>
 
 <div id="app" hidden>
@@ -187,7 +194,7 @@ input[type=password]:focus{border-color:var(--navy-600);box-shadow:0 0 0 3px rgb
     <button class="btn ghost" id="btnRefrescar" style="margin-top:20px" onclick="cargar(true)">Actualizar</button>
     <button class="btn ghost" id="btnCSV" onclick="bajarCSV()">Bajar a Excel</button>
     <p style="text-align:center;font-size:11.5px;color:var(--navy-300);margin:22px 0 10px">
-      Portal v1.1</p>
+      Portal v1.2</p>
   </div>
 </div>
 
@@ -207,17 +214,47 @@ let CAT = null, BARRIOS = null, editando = null;   // editando: id de producto, 
 const tok = () => { try { return localStorage.getItem('ma_portal') || ''; } catch(e){ return ''; } };
 
 /* ============ ACCESO ============ */
+let esAdmin = false;
+
+// El desplegable se llena antes de pedir el PIN: son solo nombres de locales.
+async function listarSucursales(){
+  try {
+    const r = await fetch(BACKEND + '?action=sucursales', { redirect:'follow' });
+    const d = await r.json();
+    if (d.error || !d.length) throw new Error('sin sucursales');
+    SUCS = d;
+    let ult = '';
+    try { ult = localStorage.getItem('ma_portal_suc') || ''; } catch(e){}
+    $('#loginSuc').innerHTML = SUCS.map(x =>
+      '<option value="' + esc(x.nombre) + '"' + (x.nombre === ult ? ' selected' : '') + '>' +
+      esc(x.nombre) + '</option>').join('');
+  } catch(e){
+    error('No pudimos conectarnos. Revisá internet.');
+  }
+}
+
 async function entrar(){
   const v = $('#clave').value.trim();
-  if (v.length < 8) return error('La clave es más larga que eso.');
-  TOKEN = v;
+  if (!v) return error('Escribí el PIN.');
+  const elegida = $('#loginSuc').value;
   try {
-    const r = await fetch(BACKEND + '?action=sucursales&token=' + encodeURIComponent(TOKEN),
+    const r = await fetch(BACKEND + '?action=entrar&token=' + encodeURIComponent(v),
                           { redirect:'follow' });
     const d = await r.json();
-    if (d.error) return error('Clave incorrecta.');
-    SUCS = d;
-    try { localStorage.setItem('ma_portal', TOKEN); } catch(e){}
+    if (d.error) return error('PIN incorrecto.');
+
+    // Un PIN de sucursal solo abre la suya, diga lo que diga el desplegable.
+    if (!d.admin){
+      const suya = SUCS.filter(x => x.id === d.suc)[0];
+      if (!suya) return error('Ese PIN no corresponde a ninguna sucursal activa.');
+      if (suya.nombre !== elegida) return error('Ese PIN no es el de ' + elegida + '.');
+    }
+    TOKEN = v; esAdmin = !!d.admin;
+    suc = d.admin ? elegida : (SUCS.filter(x => x.id === d.suc)[0] || {}).nombre;
+    try {
+      localStorage.setItem('ma_portal', TOKEN);
+      localStorage.setItem('ma_portal_suc', suc);
+    } catch(e){}
     arrancarApp();
   } catch(e){ error('No pudimos conectarnos. Revisá internet.'); }
 }
@@ -235,21 +272,20 @@ function salir(){
 function arrancarApp(){
   $('#login').hidden = true;
   $('#app').hidden = false;
-  $('#selSuc').innerHTML = SUCS.map(s =>
-    '<option value="'+esc(s.nombre)+'">'+esc(s.nombre)+'</option>').join('');
-  let guardada = '';
-  try { guardada = localStorage.getItem('ma_portal_suc') || ''; } catch(e){}
-  if (guardada && SUCS.some(s => s.nombre === guardada)) $('#selSuc').value = guardada;
-  suc = $('#selSuc').value;
+  const sel = $('#selSuc');
+  sel.innerHTML = (esAdmin ? SUCS : SUCS.filter(x => x.nombre === suc))
+    .map(x => '<option value="' + esc(x.nombre) + '">' + esc(x.nombre) + '</option>').join('');
+  sel.value = suc;
+  sel.disabled = !esAdmin;        // el encargado no se puede cambiar de sucursal
   cargar();
 }
 
 function cambiarSuc(){
   suc = $('#selSuc').value;
   try { localStorage.setItem('ma_portal_suc', suc); } catch(e){}
-  fechaSel = null; CAT = null; editando = null;
+  fechaSel = null; CAT = null; BARRIOS = null; editando = null;
   if (tab === 'catalogo') return cargarCatalogo();
-  if (tab === 'barrios')  return pintarBarrios();
+  if (tab === 'barrios')  return cargarBarrios();
   cargar();
 }
 
@@ -626,8 +662,8 @@ const DIAS = ['lunes','martes','miércoles','jueves','viernes','sábado','doming
 async function cargarBarrios(){
   $('#cuerpo').innerHTML = '<div class="vacio">Cargando barrios…</div>';
   try {
-    const r = await fetch(BACKEND + '?action=barriosAdmin&token=' + encodeURIComponent(TOKEN),
-                          { redirect:'follow' });
+    const r = await fetch(BACKEND + '?action=barriosAdmin&token=' + encodeURIComponent(TOKEN) +
+                          '&suc=' + encodeURIComponent(sucId()), { redirect:'follow' });
     const d = await r.json();
     if (d.error) throw new Error(d.error);
     BARRIOS = d;
@@ -797,18 +833,24 @@ function bajarCSV(){
 
 /* ============ INICIO ============ */
 (async function(){
+  await listarSucursales();
   const t = tok();
-  if (!t) return;
-  TOKEN = t;
+  if (!t || !SUCS.length) return;
   try {
-    const r = await fetch(BACKEND + '?action=sucursales&token=' + encodeURIComponent(TOKEN),
+    const r = await fetch(BACKEND + '?action=entrar&token=' + encodeURIComponent(t),
                           { redirect:'follow' });
     const d = await r.json();
     if (d.error) return;
-    SUCS = d;
-    arrancarApp();
+    TOKEN = t; esAdmin = !!d.admin;
+    let guardada = '';
+    try { guardada = localStorage.getItem('ma_portal_suc') || ''; } catch(e){}
+    suc = d.admin
+      ? (SUCS.some(x => x.nombre === guardada) ? guardada : SUCS[0].nombre)
+      : (SUCS.filter(x => x.id === d.suc)[0] || {}).nombre;
+    if (suc) arrancarApp();
   } catch(e){}
 })();
+
 </script>
 </body>
 </html>

@@ -87,8 +87,15 @@ deja de encontrar el backend.
 
 ## El portal de la sucursal
 
-`tu-dominio/portal.html` — se entra con la misma clave del backend, queda guardada en ese
-navegador. Pensado para la compu o la tablet del mostrador.
+`tu-dominio/portal.html` — se elige la **sucursal** y se escribe su **PIN**. Queda guardado en
+ese navegador. Pensado para la compu o la tablet del mostrador.
+
+**Cada sucursal tiene su PIN**, en la columna `pin` de la pestaña Sucursales. Con ese PIN el
+encargado entra solo a lo suyo: sus pedidos, su catálogo, sus barrios. El selector de sucursal
+le queda bloqueado y el backend rechaza cualquier pedido sobre otra, aunque se lo pida a mano.
+
+**El TOKEN maestro sigue funcionando como PIN** y abre todas las sucursales, con el selector
+habilitado. Ese es el tuyo: no hace falta repartirlo.
 
 - Arriba se elige la sucursal; abajo, la fecha de entrega.
 - **Pedidos**: cada uno es una tarjeta — cliente, barrio, piso, teléfono, pago, total. Se toca
@@ -123,4 +130,4 @@ función `crearActivador()`** desde el editor de Apps Script.
 
 ## Versión
 
-`v2.0` (app) y `v1.1` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
+`v2.0` (app) y `v1.2` (portal) — aparecen al pie de cada una. Conviene mencionarla al reportar un problema.
